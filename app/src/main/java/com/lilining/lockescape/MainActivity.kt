@@ -2,7 +2,10 @@ package com.lilining.lockescape
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
@@ -57,7 +60,37 @@ class MainActivity : AppCompatActivity() {
         binding.tvAccessibilityStatus.text =
             if (isAccessibilityEnabled()) "无障碍服务：已开启" else "无障碍服务：未开启"
         binding.tvShizukuStatus.text = shizukuStatusText()
+        binding.tvBatteryStatus.text = batteryOptimizationText()
         binding.tvCurrentTop.text = "当前顶层应用：" + Prefs.currentTopPackage(this).ifBlank { "未知（等待无障碍事件）" }
+    }
+
+    private fun batteryOptimizationText(): String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val pm = getSystemService(POWER_SERVICE) as PowerManager
+        if (pm.isIgnoringBatteryOptimizations(packageName)) {
+            "电池优化：已忽略（后台监听稳定）"
+        } else {
+            "电池优化：未忽略（系统可能杀掉后台监听）"
+        }
+    } else {
+        "电池优化：无需处理（Android 6 以下）"
+    }
+
+    private fun requestIgnoreBatteryOptimizations() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            toast("当前系统无需忽略电池优化")
+            return
+        }
+        val pm = getSystemService(POWER_SERVICE) as PowerManager
+        if (pm.isIgnoringBatteryOptimizations(packageName)) {
+            toast("已处于忽略电池优化状态")
+            return
+        }
+        startActivity(
+            Intent(
+                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                Uri.parse("package:$packageName")
+            )
+        )
     }
 
     private fun isAccessibilityEnabled(): Boolean {
