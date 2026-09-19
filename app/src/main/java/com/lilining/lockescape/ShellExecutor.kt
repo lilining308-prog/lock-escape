@@ -35,12 +35,18 @@ object ShellExecutor {
 
     private fun runViaShizuku(cmd: String): Pair<Boolean, String> {
         return try {
-            val process = Shizuku.newProcess(arrayOf("sh", "-c", cmd), null, null)
+            // Shizuku 13.x 将 newProcess 设为私有，这里反射调用（返回 Process 子类）
+            val method = Shizuku::class.java.getDeclaredMethod(
+                "newProcess",
+                Array<String>::class.java, Array<String>::class.java, String::class.java
+            )
+            method.isAccessible = true
+            val process = method.invoke(null, arrayOf("sh", "-c", cmd), null, null) as Process
             val exit = process.waitFor()
             val out = process.inputStream.bufferedReader().readText().trim()
             val err = process.errorStream.bufferedReader().readText().trim()
             Pair(exit == 0, if (out.isNotEmpty()) out else err)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             // Shizuku 通道失败时降级 su
             runViaSu(cmd)
         }

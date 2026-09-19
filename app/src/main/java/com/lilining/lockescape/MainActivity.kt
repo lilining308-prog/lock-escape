@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-            Shizuku.requestPermission(ShizukuProvider.MANAGER_APPLICATION_ID)
+            Shizuku.requestPermission(0)
         } else {
             toast("Shizuku 已有权限")
         }

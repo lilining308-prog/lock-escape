@@ -6,8 +6,9 @@ import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
 import com.lilining.lockescape.databinding.ActivityEscapeBinding
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -19,7 +20,7 @@ class EscapeActivity : Activity() {
 
     private lateinit var binding: ActivityEscapeBinding
 
-    private val scope = CoroutineScope(Dispatchers.Main + Job())
+    private val scope = MainScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

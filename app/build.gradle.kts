@@ -45,4 +45,7 @@ dependencies {
     // Shizuku 权限通道（Apache-2.0）
     implementation("dev.rikka.shizuku:api:13.1.5")
     implementation("dev.rikka.shizuku:provider:13.1.5")
+
+    // 协程（逃生动作异步执行）
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 }
