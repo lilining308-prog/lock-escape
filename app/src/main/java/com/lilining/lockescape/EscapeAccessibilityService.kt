@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 
@@ -27,12 +28,14 @@ class EscapeAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        Log.i("EscapeA11y", "serviceInfo.flags=${serviceInfo.flags} FLAG_REQUEST_FILTER_KEY_EVENTS=${android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS}")
         // 启动前台保活服务
         startForegroundService(Intent(this, DaemonService::class.java))
     }
 
     override fun onKeyEvent(event: KeyEvent?): Boolean {
         event ?: return false
+        Log.i("EscapeA11y", "onKeyEvent: keyCode=${event.keyCode} action=${event.action} source=${event.source}")
         // 只处理音量键事件
         val isVolumeKey = event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
                 event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
