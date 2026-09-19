@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
         binding.btnShizuku.setOnClickListener { requestShizukuPermission() }
+        binding.btnBatteryOptimization.setOnClickListener { requestIgnoreBatteryOptimizations() }
         binding.btnTestEscape.setOnClickListener {
             startActivity(Intent(this, EscapeActivity::class.java))
         }
@@ -62,6 +63,8 @@ class MainActivity : AppCompatActivity() {
         binding.tvShizukuStatus.text = shizukuStatusText()
         binding.tvBatteryStatus.text = batteryOptimizationText()
         binding.tvCurrentTop.text = "当前顶层应用：" + Prefs.currentTopPackage(this).ifBlank { "未知（等待无障碍事件）" }
+        val logs = Prefs.getEscapeLogs(this)
+        binding.tvLogs.text = if (logs.isEmpty()) "暂无逃生记录" else logs.joinToString("\n")
     }
 
     private fun batteryOptimizationText(): String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

@@ -20,8 +20,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="被锁机时：音量键连按 4 次触发逃生"
+            android:text="逃生触发：长按音量下键 1.5 秒，或连按音量键 4 次"
             android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="紧急状态：逃生界面可强停/停用/卸载锁机应用，支持持续压制"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary" />
 
         <TextView
             android:id="@+id/tvAccessibilityStatus"
@@ -82,6 +90,23 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="测试逃生界面" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="逃生记录"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvLogs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="monospace"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
 
     </LinearLayout>
 </ScrollView>

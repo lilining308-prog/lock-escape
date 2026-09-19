@@ -3,4 +3,6 @@
     <color name="escape_red">#FF3B30</color>
     <color name="escape_bg">#101014</color>
     <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B3B8</color>
+    <color name="card_bg">#1C1C22</color>
 </resources>
