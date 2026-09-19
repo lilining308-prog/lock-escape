@@ -1,3 +1,14 @@
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: c9eff8d25d622adeab9f9582a71074c0_8c278ba0b40411f1a1a1525400393706
+    ReservedCode1: ohd7c4LHC/fK+dTaihNZMVOzOs+tFn4d6wX8RadTmvWqUCCH0ufh0zraOmJQOtmZZ4y5olOwC+k1bq5F0WUvYvbmLhejYHAAoD/0L3H81ITbORsxq/vhwkDmbC+OYrnSp7vMbrVSdtvoZagHU9LKyGyBrN6yt95H7X0NUGd0D8wkOUw3nOz2FUCvZSs=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: c9eff8d25d622adeab9f9582a71074c0_8c278ba0b40411f1a1a1525400393706
+    ReservedCode2: ohd7c4LHC/fK+dTaihNZMVOzOs+tFn4d6wX8RadTmvWqUCCH0ufh0zraOmJQOtmZZ4y5olOwC+k1bq5F0WUvYvbmLhejYHAAoD/0L3H81ITbORsxq/vhwkDmbC+OYrnSp7vMbrVSdtvoZagHU9LKyGyBrN6yt95H7X0NUGd0D8wkOUw3nOz2FUCvZSs=
+---
+
 # lock-escape 锁机逃生
 
 Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控制时，通过**物理按键组合触发**，强制全屏覆盖拦截，并借助 Shizuku / root 删除或停用锁机组件。
@@ -30,3 +41,4 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 - [ ] 全屏 overlay 拦截界面
 - [ ] Shizuku/root 删除通道
 - [ ] 前台保活
+*（内容由AI生成，仅供参考）*

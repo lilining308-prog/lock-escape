@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="escape_red">#FF3B30</color>
+    <color name="escape_bg">#101014</color>
+    <color name="text_primary">#FFFFFF</color>
+</resources>
