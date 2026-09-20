@@ -27,14 +27,20 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 
 ## 技术选型参考
 
-| 能力块 | 参考项目 | 许可证 |
-|--------|---------|--------|
-| 物理按键监听 | F111111shhh/Extinguish（fork 自 Moderpach/Extinguish） | GPL-3.0 |
-| 无障碍窗口监控 | hnpdsyn/PhoneGuard | MIT |
-| 全屏覆盖 | coderlidy/Fake-Lock-Screen | 待确认 |
-| 紧急触发参考 | me.lucky/wasted | GPL-3.0 |
-| root 权限通道 | RikkaApps/Shizuku | Apache-2.0 |
-| 停用/冻结实现 | aistra0528/Hail | GPL-3.0 |
+| 能力块 | 参考项目 | 许可证 | 核实状态 |
+|--------|---------|--------|---------|
+| 物理按键监听 | F111111shhh/Extinguish（fork 自 Moderpach/Extinguish） | GPL-3.0 | 已核实 |
+| 无障碍窗口监控 | hnpdsyn/PhoneGuard | 无 LICENSE | 仓库无许可证文件，仅参考思路未复制代码 |
+| 全屏覆盖 | coderlidy/Fake-Lock-Screen | MIT | 已核实 |
+| 紧急触发参考 | me.lucky/wasted | 待核实 | 仓库当前 404 不可访问 |
+| root 权限通道 | RikkaApps/Shizuku | Apache-2.0 | 已核实 |
+| 停用/冻结实现 | aistra0528/Hail | GPL-3.0 | 已核实 |
+
+## 开源许可与合规
+
+- 本项目主许可证为 **GPL-3.0**（见 [LICENSE](LICENSE)）。
+- 上游参考项目的版权声明与许可文本见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+- `hnpdsyn/PhoneGuard` 无 LICENSE 文件，本项目未复制其代码；`me.lucky/wasted` 仓库不可访问，许可证待核实。
 
 ## 状态
 
