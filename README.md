@@ -70,5 +70,3 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 | 停用 | pm disable-user --user 0 | 黑名单禁止 |
 | 卸载 | pm uninstall --user 0 | 黑名单禁止 |
 | 持续压制 | 2s 循环 force-stop | 黑名单禁止 |
-
-*（内容由AI生成，仅供参考）*
