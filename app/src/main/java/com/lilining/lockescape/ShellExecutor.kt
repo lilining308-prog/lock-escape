@@ -17,7 +17,6 @@
 
 package com.lilining.lockescape
 
-import android.content.Context
 import rikka.shizuku.Shizuku
 import java.io.DataOutputStream
 import java.io.IOException
@@ -29,24 +28,51 @@ import java.io.IOException
  */
 object ShellExecutor {
 
-    fun forceStop(pkg: String): Pair<Boolean, String> =
-        run("am force-stop $pkg")
+    enum class Mode {
+        AUTO,
+        ROOT
+    }
 
-    fun disable(pkg: String): Pair<Boolean, String> =
-        run("pm disable-user --user 0 $pkg")
+    fun forceStop(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
+        run("am force-stop $pkg", mode)
 
-    fun uninstall(pkg: String): Pair<Boolean, String> =
-        run("pm uninstall --user 0 $pkg")
+    fun disable(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
+        run("pm disable-user --user 0 $pkg", mode)
 
-    private fun run(cmd: String): Pair<Boolean, String> {
+    fun uninstall(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
+        run("pm uninstall --user 0 $pkg", mode)
+
+    private fun run(cmd: String, mode: Mode): Pair<Boolean, String> {
         return try {
-            if (Shizuku.pingBinder()) {
-                runViaShizuku(cmd)
-            } else {
-                runViaSu(cmd)
-            }
+            runInternal(cmd, mode, Shizuku.pingBinder(), ::runViaShizuku, ::runViaSu)
         } catch (e: Exception) {
             Pair(false, e.message ?: e.javaClass.simpleName)
+        }
+    }
+
+    internal fun runForTest(
+        command: String,
+        mode: Mode,
+        shizukuAvailable: Boolean,
+        runShizuku: (String) -> Pair<Boolean, String>,
+        runSu: (String) -> Pair<Boolean, String>
+    ): Pair<Boolean, String> = runInternal(command, mode, shizukuAvailable, runShizuku, runSu)
+
+    internal fun runSuForTest(
+        command: String,
+        exec: (Array<String>) -> Pair<Boolean, String>
+    ): Pair<Boolean, String> = runSuCommand(command, exec)
+
+    private fun runInternal(
+        cmd: String,
+        mode: Mode,
+        shizukuAvailable: Boolean,
+        runShizuku: (String) -> Pair<Boolean, String>,
+        runSu: (String) -> Pair<Boolean, String>
+    ): Pair<Boolean, String> {
+        return when (mode) {
+            Mode.ROOT -> runSu(cmd)
+            Mode.AUTO -> if (shizukuAvailable) runShizuku(cmd) else runSu(cmd)
         }
     }
 
@@ -71,14 +97,27 @@ object ShellExecutor {
 
     private fun runViaSu(cmd: String): Pair<Boolean, String> {
         return try {
-            val process = Runtime.getRuntime().exec(arrayOf("su", "-c", cmd))
-            val exit = process.waitFor()
-            val out = process.inputStream.bufferedReader().readText().trim()
-            val err = process.errorStream.bufferedReader().readText().trim()
-            Pair(exit == 0, if (out.isNotEmpty()) out else err)
+            runSuCommand(cmd) { args ->
+                val process = Runtime.getRuntime().exec(args)
+                val exit = process.waitFor()
+                val out = process.inputStream.bufferedReader().readText().trim()
+                val err = process.errorStream.bufferedReader().readText().trim()
+                Pair(exit == 0, if (out.isNotEmpty()) out else err)
+            }
         } catch (e: IOException) {
-            Pair(false, "无 Shizuku 且无 root（su 不可用）")
+            Pair(false, "root 不可用（su 不可用）")
         }
+    }
+
+    private fun runSuCommand(
+        cmd: String,
+        exec: (Array<String>) -> Pair<Boolean, String>
+    ): Pair<Boolean, String> {
+        val primary = exec(arrayOf("su", "-c", cmd))
+        if (primary.first || !primary.second.contains("invalid uid/gid", ignoreCase = true)) {
+            return primary
+        }
+        return exec(arrayOf("su", "0", "sh", "-c", cmd))
     }
 
     /**

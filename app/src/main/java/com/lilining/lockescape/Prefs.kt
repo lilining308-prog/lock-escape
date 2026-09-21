@@ -29,6 +29,7 @@ object Prefs {
     private const val NAME = "lock_escape_prefs"
     private const val KEY_TOP_PACKAGE = "top_package"
     private const val KEY_LOGS = "escape_logs"
+    private const val KEY_EXECUTION_MODE = "execution_mode"
     private const val MAX_LOGS = 20
 
     fun currentTopPackage(ctx: Context): String =
@@ -58,5 +59,18 @@ object Prefs {
         val sp = ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
         val raw = sp.getString(KEY_LOGS, "") ?: ""
         return if (raw.isBlank()) emptyList() else raw.split("\n")
+    }
+
+    fun executionMode(ctx: Context): ShellExecutor.Mode {
+        val raw = ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .getString(KEY_EXECUTION_MODE, ShellExecutor.Mode.AUTO.name)
+        return ShellExecutor.Mode.entries.firstOrNull { it.name == raw } ?: ShellExecutor.Mode.AUTO
+    }
+
+    fun saveExecutionMode(ctx: Context, mode: ShellExecutor.Mode) {
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_EXECUTION_MODE, mode.name)
+            .apply()
     }
 }

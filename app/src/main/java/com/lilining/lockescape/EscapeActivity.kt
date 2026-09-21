@@ -21,8 +21,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.KeyguardManager
 import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
@@ -65,16 +63,21 @@ class EscapeActivity : Activity() {
         refreshTopPackage()
 
         binding.btnForceStop.setOnClickListener {
-            runAction("强停", "am force-stop 后该应用会立即退出，锁机病毒一般会重新拉起", true) { ShellExecutor.forceStop(it) }
+            runAction("强停", "am force-stop 后该应用会立即退出，锁机病毒一般会重新拉起", true) { pkg, mode -> ShellExecutor.forceStop(pkg, mode) }
         }
         binding.btnDisable.setOnClickListener {
-            runAction("停用", "停用后应用将无法启动，用于永久压制锁机病毒", false) { ShellExecutor.disable(it) }
+            runAction("停用", "停用后应用将无法启动，用于永久压制锁机病毒", false) { pkg, mode -> ShellExecutor.disable(pkg, mode) }
         }
         binding.btnUninstall.setOnClickListener {
-            runAction("卸载", "卸载后应用将被移除（用户 0 范围）", false) { ShellExecutor.uninstall(it) }
+            runAction("卸载", "卸载后应用将被移除（用户 0 范围）", false) { pkg, mode -> ShellExecutor.uninstall(pkg, mode) }
         }
         binding.btnExit.setOnClickListener { finish() }
         binding.btnRefresh.setOnClickListener { refreshTopPackage() }
+        binding.switchRootMode.isChecked = Prefs.executionMode(this) == ShellExecutor.Mode.ROOT
+        binding.switchRootMode.setOnCheckedChangeListener { _, checked ->
+            Prefs.saveExecutionMode(this, if (checked) ShellExecutor.Mode.ROOT else ShellExecutor.Mode.AUTO)
+            toast(if (checked) "已切换为 root 优先模式" else "已切换为自动模式")
+        }
 
         // 持续压制模式：每隔 SUPPRESS_INTERVAL_MS 强制停止当前顶层包名，防止病毒重启
         binding.switchSuppress.setOnCheckedChangeListener { _, checked ->
@@ -109,7 +112,8 @@ class EscapeActivity : Activity() {
         binding.tvResult.text = "持续压制中：$pkg"
         suppressJob = scope.launch {
             while (isActive) {
-                val (ok, out) = withContext(Dispatchers.IO) { ShellExecutor.forceStop(pkg) }
+                val mode = Prefs.executionMode(this@EscapeActivity)
+                val (ok, out) = withContext(Dispatchers.IO) { ShellExecutor.forceStop(pkg, mode) }
                 if (!ok) {
                     binding.tvResult.text = "压制失败：$out"
                     break
@@ -129,29 +133,20 @@ class EscapeActivity : Activity() {
         val pkg = Prefs.currentTopPackage(this)
         val sb = StringBuilder("被锁应用：$pkg")
         if (isSystemApp(pkg)) {
-            sb.append("\n⚠ 警告：这是系统应用，禁止停用/卸载！")
+            sb.append("\n⚠ 警告：这是系统关键应用，禁止停用/卸载！")
         }
         binding.tvTopPackage.text = sb.toString()
+        binding.tvLogs.text = Prefs.getEscapeLogs(this).joinToString("\n").ifBlank { "暂无逃生记录" }
     }
 
-    /** 判断是否为系统关键应用：系统预装 或 显式黑名单 */
-    private fun isSystemApp(pkg: String): Boolean {
-        if (pkg.isBlank()) return false
-        // 显式黑名单：桌面 / 系统UI / 设置 / 电话 / 系统界面相关
-        if (pkg in SYSTEM_BLACKLIST) return true
-        return try {
-            val ai = packageManager.getApplicationInfo(pkg, 0)
-            (ai.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0
-        } catch (e: PackageManager.NameNotFoundException) {
-            false
-        }
-    }
+    /** 只保护会导致设备不可用的关键系统包；普通预装应用允许处理。 */
+    private fun isSystemApp(pkg: String): Boolean = AppSafety.isProtectedPackage(pkg)
 
     private fun runAction(
         actionName: String,
         desc: String,
         allowSystem: Boolean,
-        action: (String) -> Pair<Boolean, String>
+        action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>
     ) {
         val pkg = Prefs.currentTopPackage(this)
         if (pkg.isBlank()) {
@@ -161,9 +156,9 @@ class EscapeActivity : Activity() {
         val system = isSystemApp(pkg)
         if (system && !allowSystem) {
             AlertDialog.Builder(this)
-                .setTitle("已拦截：系统应用")
-                .setMessage("$pkg 是系统关键应用（桌面/系统UI/设置等），停用或卸载会导致桌面丢失、无法开机。\n\n如需处理，请先确认该应用确实是锁机病毒。")
-                .setPositiveButton("仍然继续", null)
+                .setTitle("已拦截：系统关键应用")
+                .setMessage("$pkg 是系统关键组件（桌面/系统UI/设置/电话等），停用或卸载可能导致设备不可用。")
+                .setPositiveButton("知道了", null)
                 .setNegativeButton("取消", null)
                 .setOnDismissListener { refreshTopPackage() }
                 .show()
@@ -180,12 +175,14 @@ class EscapeActivity : Activity() {
             .show()
     }
 
-    private fun execute(pkg: String, action: (String) -> Pair<Boolean, String>) {
+    private fun execute(pkg: String, action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>) {
         binding.tvResult.text = "执行中..."
         scope.launch {
-            val (ok, out) = withContext(Dispatchers.IO) { action(pkg) }
+            val mode = Prefs.executionMode(this@EscapeActivity)
+            val (ok, out) = withContext(Dispatchers.IO) { action(pkg, mode) }
             binding.tvResult.text = if (ok) "成功：$out" else "失败：$out"
-            Prefs.addEscapeLog(this@EscapeActivity, if (ok) "成功：$pkg → $out" else "失败：$pkg → $out")
+            Prefs.addEscapeLog(this@EscapeActivity, if (ok) "成功[$mode]：$pkg -> $out" else "失败[$mode]：$pkg -> $out")
+            refreshTopPackage()
         }
     }
 
@@ -201,15 +198,5 @@ class EscapeActivity : Activity() {
         /** 持续压制间隔 */
         private const val SUPPRESS_INTERVAL_MS = 2000L
 
-        private val SYSTEM_BLACKLIST = setOf(
-            "com.android.launcher3",                    // 原生桌面
-            "com.android.systemui",                     // 系统 UI
-            "com.android.settings",                     // 设置
-            "com.android.phone",                        // 电话
-            "com.google.android.apps.nexuslauncher",    // Pixel 桌面
-            "com.google.android.gms",                   // GMS
-            "com.android.providers.media",              // 媒体存储
-            "com.android.providers.settings"            // 设置存储
-        )
     }
 }

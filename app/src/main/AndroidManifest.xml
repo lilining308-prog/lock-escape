@@ -32,6 +32,19 @@
             </intent-filter>
         </activity>
 
+        <!-- 独立 Root 逃生入口：启动后自动切换 root 优先模式 -->
+        <activity
+            android:name=".RootLauncherActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:label="@string/root_launcher_label"
+            android:theme="@style/Theme.LockEscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!-- 全屏逃生拦截界面 -->
         <activity
             android:name=".EscapeActivity"
