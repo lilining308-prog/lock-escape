@@ -1,14 +1,3 @@
----
-AIGC:
-    Label: "1"
-    ContentProducer: 001191440300708461136T1XGW3
-    ProduceID: c9eff8d25d622adeab9f9582a71074c0_77d4d2ecb4a911f193fb525400393706
-    ReservedCode1: lqQIpRs5+oUFHA/OLDZ9Vl9pUxu3RQYMRdiZIBdLmu+0nL15jauJkiabm5LvIH7bojU/S80aUr2SrKpewor6czeq01vr0I1Dx4cvoSJrHg8EKqPhY8h1B3PESuvPIy+4VeG6wf52yJG8BI+LC0RpGf4hnmNXN3BcxKHp5xlBWizC7LguetpkBxVh18E=
-    ContentPropagator: 001191440300708461136T1XGW3
-    PropagateID: c9eff8d25d622adeab9f9582a71074c0_77d4d2ecb4a911f193fb525400393706
-    ReservedCode2: lqQIpRs5+oUFHA/OLDZ9Vl9pUxu3RQYMRdiZIBdLmu+0nL15jauJkiabm5LvIH7bojU/S80aUr2SrKpewor6czeq01vr0I1Dx4cvoSJrHg8EKqPhY8h1B3PESuvPIy+4VeG6wf52yJG8BI+LC0RpGf4hnmNXN3BcxKHp5xlBWizC7LguetpkBxVh18E=
----
-
 # Third-Party Notices
 
 本项目的设计实现参考了以下开源项目。所有上游项目的版权归其各自作者所有。
@@ -28,9 +17,11 @@ AIGC:
 ## 许可证文本位置
 
 - GPL-3.0 全文：见本项目根目录 [LICENSE](LICENSE)
-- Apache-2.0 / MIT 全文：随各上游项目发布，可从其仓库获取
+- Apache-2.0 / MIT 全文：见本项目根目录 [NOTICE](NOTICE)（含各上游项目的完整版权信息与许可文本）
 
 ## 上游版权声明（按许可证要求保留）
+
+各上游项目的版权归属、NOTICE 说明及完整许可文本见根目录 [NOTICE](NOTICE)，此处不再重复全文，仅保留义务摘要：
 
 ### GPL-3.0（Extinguish / Hail）
 
@@ -39,19 +30,11 @@ AIGC:
 
 ### MIT（Fake-Lock-Screen）
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+完整 MIT 许可文本（含版权声明）见 [NOTICE](NOTICE)。
 
 ### Apache-2.0（Shizuku）
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+Shizuku 仓库无独立 NOTICE 文件；完整 Apache-2.0 许可文本见 [NOTICE](NOTICE)。
 
 ## 合规说明
 
@@ -62,4 +45,3 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 ---
 本文件由 lock-escape 项目维护，随项目分发。
-*（内容由AI生成，仅供参考）*

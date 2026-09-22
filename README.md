@@ -38,7 +38,7 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 ## 开源许可与合规
 
 - 本项目主许可证为 **GPL-3.0**（见 [LICENSE](LICENSE)）。
-- 上游参考项目的版权声明与许可文本见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+- 上游参考项目的版权归属与完整许可文本见 [NOTICE](NOTICE)，项目清单与合规说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - `hnpdsyn/PhoneGuard` 无 LICENSE 文件，本项目未复制其代码；`me.lucky/wasted` 仓库不可访问，许可证待核实。
 
 ## 状态
