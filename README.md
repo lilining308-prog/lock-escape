@@ -40,6 +40,13 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 - 本项目主许可证为 **GPL-3.0**（见 [LICENSE](LICENSE)）。
 - 上游参考项目的版权归属与完整许可文本见 [NOTICE](NOTICE)，项目清单与合规说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - `hnpdsyn/PhoneGuard` 无 LICENSE 文件，本项目未复制其代码；`me.lucky/wasted` 仓库不可访问，许可证待核实。
+- 源码随仓库公开，源码仓库地址：<https://github.com/lilining308-prog/lock-escape>。主要源码在 `app/src/main/java/`，测试源码在 `app/src/test/java/`。分发 APK 时应同时提供源码仓库地址、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
+
+## APK 下载
+
+面向普通用户，请下载：`apk/推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk`。
+
+更多 APK 分类、历史版本和调试版说明见 [apk/README.md](apk/README.md)。
 
 ## 状态
 
@@ -54,6 +61,7 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 - [x] 逃生日志（最近 20 条，主界面可查）
 - [x] 锁屏自动解锁辅助（requestDismissKeyguard）
 - [x] 2.0 正式版：修复音量下长按触发、系统应用误拦截，新增 root 优先模式
+- [x] 用户自定义白名单 + 系统桌面默认屏蔽，避免桌面触发风控
 
 ## 触发方式
 

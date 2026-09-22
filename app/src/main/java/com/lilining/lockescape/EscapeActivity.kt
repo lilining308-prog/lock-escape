@@ -73,6 +73,8 @@ class EscapeActivity : Activity() {
         }
         binding.btnExit.setOnClickListener { finish() }
         binding.btnRefresh.setOnClickListener { refreshTopPackage() }
+        binding.btnWhitelistCurrent.setOnClickListener { whitelistCurrentPackage() }
+        binding.btnWhitelistInput.setOnClickListener { whitelistInputPackage() }
         binding.switchRootMode.isChecked = Prefs.executionMode(this) == ShellExecutor.Mode.ROOT
         binding.switchRootMode.setOnCheckedChangeListener { _, checked ->
             Prefs.saveExecutionMode(this, if (checked) ShellExecutor.Mode.ROOT else ShellExecutor.Mode.AUTO)
@@ -109,6 +111,11 @@ class EscapeActivity : Activity() {
             binding.switchSuppress.isChecked = false
             return
         }
+        if (isWhitelisted(pkg)) {
+            toast("顶层应用已在白名单，禁止持续压制")
+            binding.switchSuppress.isChecked = false
+            return
+        }
         binding.tvResult.text = "持续压制中：$pkg"
         suppressJob = scope.launch {
             while (isActive) {
@@ -135,12 +142,57 @@ class EscapeActivity : Activity() {
         if (isSystemApp(pkg)) {
             sb.append("\n⚠ 警告：这是系统关键应用，禁止停用/卸载！")
         }
+        if (isWhitelisted(pkg)) {
+            sb.append("\n已加入白名单：不会触发风控或逃生动作")
+        }
         binding.tvTopPackage.text = sb.toString()
+        binding.tvWhitelist.text = whitelistText()
         binding.tvLogs.text = Prefs.getEscapeLogs(this).joinToString("\n").ifBlank { "暂无逃生记录" }
     }
 
     /** 只保护会导致设备不可用的关键系统包；普通预装应用允许处理。 */
     private fun isSystemApp(pkg: String): Boolean = AppSafety.isProtectedPackage(pkg)
+
+    private fun isWhitelisted(pkg: String): Boolean =
+        AppSafety.isWhitelistedPackage(pkg, Prefs.userWhitelist(this))
+
+    private fun whitelistText(): String {
+        val whitelist = Prefs.userWhitelist(this).sorted()
+        return if (whitelist.isEmpty()) {
+            "用户白名单：暂无。系统桌面已默认屏蔽。"
+        } else {
+            "用户白名单：\n" + whitelist.joinToString("\n")
+        }
+    }
+
+    private fun whitelistCurrentPackage() {
+        val pkg = Prefs.currentTopPackage(this)
+        if (pkg.isBlank()) {
+            toast("尚未捕获到顶层应用包名")
+            return
+        }
+        addWhitelistPackage(pkg)
+    }
+
+    private fun whitelistInputPackage() {
+        addWhitelistPackage(binding.etWhitelistPackage.text?.toString().orEmpty())
+        binding.etWhitelistPackage.text?.clear()
+    }
+
+    private fun addWhitelistPackage(pkg: String) {
+        val normalized = pkg.trim()
+        if (normalized.isBlank()) {
+            toast("请输入包名")
+            return
+        }
+        Prefs.addUserWhitelistPackage(this, normalized)
+        if (Prefs.currentTopPackage(this) == normalized) {
+            Prefs.clearCurrentTopPackage(this)
+        }
+        Prefs.addEscapeLog(this, "加入白名单 $normalized")
+        toast("已加入白名单：$normalized")
+        refreshTopPackage()
+    }
 
     private fun runAction(
         actionName: String,
@@ -154,6 +206,15 @@ class EscapeActivity : Activity() {
             return
         }
         val system = isSystemApp(pkg)
+        if (isWhitelisted(pkg)) {
+            AlertDialog.Builder(this)
+                .setTitle("已拦截：白名单应用")
+                .setMessage("$pkg 已在白名单中，不会执行 $actionName。")
+                .setPositiveButton("知道了", null)
+                .setOnDismissListener { refreshTopPackage() }
+                .show()
+            return
+        }
         if (system && !allowSystem) {
             AlertDialog.Builder(this)
                 .setTitle("已拦截：系统关键应用")

@@ -33,5 +33,26 @@ object AppSafety {
         "com.google.android.gms"
     )
 
+    private val DEFAULT_WHITELIST_PACKAGES = setOf(
+        "com.android.launcher",
+        "com.android.launcher2",
+        "com.android.launcher3",
+        "com.google.android.apps.nexuslauncher",
+        "com.miui.home",
+        "com.huawei.android.launcher",
+        "com.oppo.launcher",
+        "com.coloros.launcher",
+        "com.vivo.launcher",
+        "com.sec.android.app.launcher",
+        "com.microsoft.launcher",
+        "com.teslacoilsw.launcher"
+    )
+
     fun isProtectedPackage(pkg: String): Boolean = pkg in PROTECTED_PACKAGES
+
+    fun isWhitelistedPackage(pkg: String, userWhitelist: Set<String>): Boolean =
+        pkg in DEFAULT_WHITELIST_PACKAGES || pkg in userWhitelist
+
+    fun shouldTrackTopPackage(pkg: String, userWhitelist: Set<String>): Boolean =
+        pkg.isNotBlank() && !isWhitelistedPackage(pkg, userWhitelist)
 }

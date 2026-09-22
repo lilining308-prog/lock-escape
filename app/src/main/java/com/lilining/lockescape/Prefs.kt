@@ -30,6 +30,7 @@ object Prefs {
     private const val KEY_TOP_PACKAGE = "top_package"
     private const val KEY_LOGS = "escape_logs"
     private const val KEY_EXECUTION_MODE = "execution_mode"
+    private const val KEY_USER_WHITELIST = "user_whitelist"
     private const val MAX_LOGS = 20
 
     fun currentTopPackage(ctx: Context): String =
@@ -40,6 +41,13 @@ object Prefs {
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_TOP_PACKAGE, pkg)
+            .apply()
+    }
+
+    fun clearCurrentTopPackage(ctx: Context) {
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .edit()
+            .remove(KEY_TOP_PACKAGE)
             .apply()
     }
 
@@ -71,6 +79,26 @@ object Prefs {
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_EXECUTION_MODE, mode.name)
+            .apply()
+    }
+
+    fun userWhitelist(ctx: Context): Set<String> {
+        val raw = ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .getString(KEY_USER_WHITELIST, "") ?: ""
+        return raw.split('\n')
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .toSet()
+    }
+
+    fun addUserWhitelistPackage(ctx: Context, pkg: String) {
+        val normalized = pkg.trim()
+        if (normalized.isBlank()) return
+        val whitelist = userWhitelist(ctx).toMutableSet()
+        whitelist.add(normalized)
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_USER_WHITELIST, whitelist.sorted().joinToString("\n"))
             .apply()
     }
 }

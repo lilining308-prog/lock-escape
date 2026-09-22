@@ -34,4 +34,26 @@ class AppSafetyTest {
         assertFalse(AppSafety.isProtectedPackage("com.android.chrome"))
         assertFalse(AppSafety.isProtectedPackage("com.google.android.youtube"))
     }
+
+    @Test
+    fun launchersAreWhitelistedByDefault() {
+        assertTrue(AppSafety.isWhitelistedPackage("com.android.launcher3", emptySet()))
+        assertTrue(AppSafety.isWhitelistedPackage("com.google.android.apps.nexuslauncher", emptySet()))
+        assertTrue(AppSafety.isWhitelistedPackage("com.miui.home", emptySet()))
+    }
+
+    @Test
+    fun userWhitelistPackagesAreWhitelisted() {
+        val userWhitelist = setOf("com.example.safe")
+
+        assertTrue(AppSafety.isWhitelistedPackage("com.example.safe", userWhitelist))
+        assertFalse(AppSafety.isWhitelistedPackage("com.example.risk", userWhitelist))
+    }
+
+    @Test
+    fun whitelistedPackagesAreNotTrackedAsTopRiskPackage() {
+        assertFalse(AppSafety.shouldTrackTopPackage("com.android.launcher3", emptySet()))
+        assertFalse(AppSafety.shouldTrackTopPackage("com.example.safe", setOf("com.example.safe")))
+        assertTrue(AppSafety.shouldTrackTopPackage("com.example.risk", setOf("com.example.safe")))
+    }
 }

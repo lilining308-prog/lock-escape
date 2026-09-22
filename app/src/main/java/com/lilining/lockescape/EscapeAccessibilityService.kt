@@ -95,7 +95,11 @@ class EscapeAccessibilityService : AccessibilityService() {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val pkg = event.packageName?.toString()
             if (!pkg.isNullOrBlank() && pkg != packageName) {
-                Prefs.saveCurrentTopPackage(this, pkg)
+                if (AppSafety.shouldTrackTopPackage(pkg, Prefs.userWhitelist(this))) {
+                    Prefs.saveCurrentTopPackage(this, pkg)
+                } else {
+                    Prefs.clearCurrentTopPackage(this)
+                }
             }
         }
     }
