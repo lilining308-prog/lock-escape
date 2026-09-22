@@ -40,7 +40,7 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 - 本项目主许可证为 **GPL-3.0**（见 [LICENSE](LICENSE)）。
 - 上游参考项目的版权归属与完整许可文本见 [NOTICE](NOTICE)，项目清单与合规说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - `hnpdsyn/PhoneGuard` 无 LICENSE 文件，本项目未复制其代码；`me.lucky/wasted` 仓库不可访问，许可证待核实。
-- 源码随仓库公开，源码仓库地址：<https://github.com/lilining308-prog/lock-escape>。主要源码在 `app/src/main/java/`，测试源码在 `app/src/test/java/`。分发 APK 时应同时提供源码仓库地址、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
+- 源码随仓库公开，点击可直接查看源码目录：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。分发 APK 时应同时提供源码目录链接、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
 
 ## APK 下载
 
