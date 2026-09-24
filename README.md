@@ -48,6 +48,14 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 
 更多 APK 分类、历史版本和调试版说明见 [apk/README.md](apk/README.md)。
 
+## 当前开发版源码
+
+- 当前开发版主源码目录：[app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)
+- 当前开发版测试源码目录：[app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)
+- 本地源码路径：`app/src/main/java/com/lilining/lockescape/`
+- 本地测试源码路径：`app/src/test/java/com/lilining/lockescape/`
+- 源码目录说明文件：`app/src/main/java/README.md`
+
 ## 状态
 
 - [x] 项目骨架（Kotlin + Gradle）

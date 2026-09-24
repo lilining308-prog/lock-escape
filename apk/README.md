@@ -32,6 +32,8 @@
 ## 源码公开与许可
 
 - 本项目源码随仓库公开，点击可直接查看源码目录：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。
+- 当前开发版本地源码路径：`app/src/main/java/com/lilining/lockescape/`。
+- 当前开发版本地测试源码路径：`app/src/test/java/com/lilining/lockescape/`。
 - 主许可证为 GPL-3.0，全文见仓库根目录 `LICENSE`。
 - 第三方声明见仓库根目录 `THIRD_PARTY_NOTICES.md` 与 `NOTICE`。
 - 分发 APK 时应同时提供源码仓库地址、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
