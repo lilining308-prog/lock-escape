@@ -34,13 +34,45 @@ object ShellExecutor {
     }
 
     fun forceStop(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
-        run("am force-stop $pkg", mode)
+        buildForceStopCommand(pkg)?.let { run(it, mode) } ?: invalidPackage(pkg)
 
     fun disable(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
-        run("pm disable-user --user 0 $pkg", mode)
+        buildDisableCommand(pkg)?.let { run(it, mode) } ?: invalidPackage(pkg)
 
     fun uninstall(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
-        run("pm uninstall --user 0 $pkg", mode)
+        buildUninstallCommand(pkg)?.let { run(it, mode) } ?: invalidPackage(pkg)
+
+    internal fun forceStopForTest(pkg: String): Pair<Boolean, String> =
+        buildForceStopCommand(pkg)?.let { true to it } ?: invalidPackage(pkg)
+
+    internal fun disableForTest(pkg: String): Pair<Boolean, String> =
+        buildDisableCommand(pkg)?.let { true to it } ?: invalidPackage(pkg)
+
+    internal fun uninstallForTest(pkg: String): Pair<Boolean, String> =
+        buildUninstallCommand(pkg)?.let { true to it } ?: invalidPackage(pkg)
+
+    internal fun forceStopCommandForTest(pkg: String): String? = buildForceStopCommand(pkg)
+
+    internal fun disableCommandForTest(pkg: String): String? = buildDisableCommand(pkg)
+
+    internal fun uninstallCommandForTest(pkg: String): String? = buildUninstallCommand(pkg)
+
+    private fun buildForceStopCommand(pkg: String): String? =
+        normalizePackage(pkg)?.let { "am force-stop $it" }
+
+    private fun buildDisableCommand(pkg: String): String? =
+        normalizePackage(pkg)?.let { "pm disable-user --user 0 $it" }
+
+    private fun buildUninstallCommand(pkg: String): String? =
+        normalizePackage(pkg)?.let { "pm uninstall --user 0 $it" }
+
+    private fun normalizePackage(pkg: String): String? {
+        val normalized = pkg.trim()
+        return normalized.takeIf { AppSafety.isValidPackageName(it) }
+    }
+
+    private fun invalidPackage(pkg: String): Pair<Boolean, String> =
+        false to "包名不合法，已拒绝执行：$pkg"
 
     private fun run(cmd: String, mode: Mode): Pair<Boolean, String> {
         return try {

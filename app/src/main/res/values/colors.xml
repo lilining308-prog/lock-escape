@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="escape_red">#FF3B30</color>
-    <color name="escape_bg">#101014</color>
+    <color name="escape_bg">#080B12</color>
     <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#B0B3B8</color>
-    <color name="card_bg">#1C1C22</color>
+    <color name="text_secondary">#A8B3C7</color>
+    <color name="text_muted">#718096</color>
+    <color name="card_bg">#151B26</color>
+    <color name="card_stroke">#263247</color>
+    <color name="accent_blue">#4DA3FF</color>
+    <color name="accent_green">#39D98A</color>
+    <color name="danger_bg">#311016</color>
+    <color name="danger_stroke">#7A1E2D</color>
+    <color name="button_dark">#22304A</color>
+    <color name="button_danger">#D9364A</color>
+    <color name="chip_blue_bg">#17365F</color>
+    <color name="chip_green_bg">#123A2A</color>
+    <color name="chip_red_bg">#4A1720</color>
 </resources>

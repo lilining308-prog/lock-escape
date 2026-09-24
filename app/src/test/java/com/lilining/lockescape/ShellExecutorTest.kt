@@ -18,6 +18,8 @@
 package com.lilining.lockescape
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ShellExecutorTest {
@@ -71,5 +73,20 @@ class ShellExecutorTest {
             ),
             calls
         )
+    }
+
+    @Test
+    fun shellCommandsRejectInvalidPackageNamesBeforeExecution() {
+        assertTrue(ShellExecutor.forceStopForTest("com.example.safe").first)
+        assertFalse(ShellExecutor.forceStopForTest("com.example.safe; reboot").first)
+        assertFalse(ShellExecutor.disableForTest("com.example.safe && reboot").first)
+        assertFalse(ShellExecutor.uninstallForTest("../bad").first)
+    }
+
+    @Test
+    fun shellCommandsUseValidatedPackageNameOnly() {
+        assertEquals("am force-stop com.example.safe", ShellExecutor.forceStopCommandForTest("com.example.safe"))
+        assertEquals("pm disable-user --user 0 com.example.safe", ShellExecutor.disableCommandForTest("com.example.safe"))
+        assertEquals("pm uninstall --user 0 com.example.safe", ShellExecutor.uninstallCommandForTest("com.example.safe"))
     }
 }

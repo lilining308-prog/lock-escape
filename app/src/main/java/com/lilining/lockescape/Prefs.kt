@@ -88,17 +88,39 @@ object Prefs {
         return raw.split('\n')
             .map { it.trim() }
             .filter { it.isNotBlank() }
-            .toSet()
+            .let { AppSafety.normalizeUserWhitelist(it.toSet()) }
     }
 
     fun addUserWhitelistPackage(ctx: Context, pkg: String) {
         val normalized = pkg.trim()
-        if (normalized.isBlank()) return
+        if (!AppSafety.isValidPackageName(normalized)) return
         val whitelist = userWhitelist(ctx).toMutableSet()
         whitelist.add(normalized)
+        saveUserWhitelist(ctx, whitelist)
+    }
+
+    fun removeUserWhitelistPackage(ctx: Context, pkg: String) {
+        val whitelist = userWhitelist(ctx).toMutableSet()
+        whitelist.remove(pkg.trim())
+        saveUserWhitelist(ctx, whitelist)
+    }
+
+    fun clearUserWhitelist(ctx: Context) {
+        saveUserWhitelist(ctx, emptySet())
+    }
+
+    fun clearEscapeLogs(ctx: Context) {
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
             .edit()
-            .putString(KEY_USER_WHITELIST, whitelist.sorted().joinToString("\n"))
+            .remove(KEY_LOGS)
+            .apply()
+    }
+
+    private fun saveUserWhitelist(ctx: Context, whitelist: Set<String>) {
+        val normalized = AppSafety.normalizeUserWhitelist(whitelist)
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_USER_WHITELIST, normalized.sorted().joinToString("\n"))
             .apply()
     }
 }

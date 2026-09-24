@@ -75,6 +75,9 @@ class EscapeActivity : Activity() {
         binding.btnRefresh.setOnClickListener { refreshTopPackage() }
         binding.btnWhitelistCurrent.setOnClickListener { whitelistCurrentPackage() }
         binding.btnWhitelistInput.setOnClickListener { whitelistInputPackage() }
+        binding.btnRemoveWhitelist.setOnClickListener { removeWhitelistPackage() }
+        binding.btnClearWhitelist.setOnClickListener { confirmClearWhitelist() }
+        binding.btnClearLogs.setOnClickListener { confirmClearLogs() }
         binding.switchRootMode.isChecked = Prefs.executionMode(this) == ShellExecutor.Mode.ROOT
         binding.switchRootMode.setOnCheckedChangeListener { _, checked ->
             Prefs.saveExecutionMode(this, if (checked) ShellExecutor.Mode.ROOT else ShellExecutor.Mode.AUTO)
@@ -146,8 +149,20 @@ class EscapeActivity : Activity() {
             sb.append("\n已加入白名单：不会触发风控或逃生动作")
         }
         binding.tvTopPackage.text = sb.toString()
+        binding.tvThreatProfile.text = threatProfileText(pkg)
         binding.tvWhitelist.text = whitelistText()
         binding.tvLogs.text = Prefs.getEscapeLogs(this).joinToString("\n").ifBlank { "暂无逃生记录" }
+    }
+
+    private fun threatProfileText(pkg: String): String {
+        if (pkg.isBlank()) return "目标画像：等待无障碍服务捕获顶层包名。"
+        val profile = PackageThreatInspector.inspect(this, pkg)
+        return buildString {
+            append("目标画像：${profile.title}（评分 ${profile.score}）")
+            append("\n建议：${profile.recommendation}")
+            append("\n依据：")
+            append(profile.reasons.joinToString("；"))
+        }
     }
 
     /** 只保护会导致设备不可用的关键系统包；普通预装应用允许处理。 */
@@ -185,6 +200,10 @@ class EscapeActivity : Activity() {
             toast("请输入包名")
             return
         }
+        if (!AppSafety.isValidPackageName(normalized)) {
+            toast("包名格式不正确")
+            return
+        }
         Prefs.addUserWhitelistPackage(this, normalized)
         if (Prefs.currentTopPackage(this) == normalized) {
             Prefs.clearCurrentTopPackage(this)
@@ -192,6 +211,44 @@ class EscapeActivity : Activity() {
         Prefs.addEscapeLog(this, "加入白名单 $normalized")
         toast("已加入白名单：$normalized")
         refreshTopPackage()
+    }
+
+    private fun removeWhitelistPackage() {
+        val normalized = binding.etWhitelistPackage.text?.toString().orEmpty().trim()
+        if (normalized.isBlank()) {
+            toast("请输入要移除的包名")
+            return
+        }
+        Prefs.removeUserWhitelistPackage(this, normalized)
+        binding.etWhitelistPackage.text?.clear()
+        Prefs.addEscapeLog(this, "移除白名单 $normalized")
+        toast("已移除白名单：$normalized")
+        refreshTopPackage()
+    }
+
+    private fun confirmClearWhitelist() {
+        AlertDialog.Builder(this)
+            .setTitle("清空用户白名单")
+            .setMessage("将清空你手动添加的白名单。系统桌面默认屏蔽仍然保留。")
+            .setPositiveButton("确认清空") { _, _ ->
+                Prefs.clearUserWhitelist(this)
+                Prefs.addEscapeLog(this, "清空用户白名单")
+                refreshTopPackage()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun confirmClearLogs() {
+        AlertDialog.Builder(this)
+            .setTitle("清空逃生记录")
+            .setMessage("将删除当前保存的逃生记录。")
+            .setPositiveButton("确认清空") { _, _ ->
+                Prefs.clearEscapeLogs(this)
+                refreshTopPackage()
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     private fun runAction(

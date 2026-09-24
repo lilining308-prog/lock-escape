@@ -56,4 +56,26 @@ class AppSafetyTest {
         assertFalse(AppSafety.shouldTrackTopPackage("com.example.safe", setOf("com.example.safe")))
         assertTrue(AppSafety.shouldTrackTopPackage("com.example.risk", setOf("com.example.safe")))
     }
+
+    @Test
+    fun packageNameValidationRejectsInvalidInput() {
+        assertTrue(AppSafety.isValidPackageName("com.example.safe"))
+        assertTrue(AppSafety.isValidPackageName("a.b_1.c2"))
+        assertFalse(AppSafety.isValidPackageName(""))
+        assertFalse(AppSafety.isValidPackageName("com example safe"))
+        assertFalse(AppSafety.isValidPackageName("com.example."))
+        assertFalse(AppSafety.isValidPackageName(".com.example"))
+    }
+
+    @Test
+    fun normalizeWhitelistTrimsBlanksAndDropsInvalidPackages() {
+        val normalized = AppSafety.normalizeUserWhitelist(
+            setOf(" com.example.safe ", "", "bad package", "com.example.safe", "com.other.app")
+        )
+
+        assertTrue("com.example.safe" in normalized)
+        assertTrue("com.other.app" in normalized)
+        assertFalse("bad package" in normalized)
+        assertFalse("" in normalized)
+    }
 }

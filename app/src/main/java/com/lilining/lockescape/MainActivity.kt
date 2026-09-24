@@ -57,6 +57,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnTestEscape.setOnClickListener {
             startActivity(Intent(this, EscapeActivity::class.java))
         }
+        binding.btnRootEscape.setOnClickListener {
+            startActivity(Intent(this, RootLauncherActivity::class.java))
+        }
     }
 
     override fun onResume() {

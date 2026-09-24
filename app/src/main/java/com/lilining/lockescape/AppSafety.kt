@@ -55,4 +55,15 @@ object AppSafety {
 
     fun shouldTrackTopPackage(pkg: String, userWhitelist: Set<String>): Boolean =
         pkg.isNotBlank() && !isWhitelistedPackage(pkg, userWhitelist)
+
+    fun isValidPackageName(pkg: String): Boolean =
+        PACKAGE_NAME_REGEX.matches(pkg.trim())
+
+    fun normalizeUserWhitelist(packages: Set<String>): Set<String> =
+        packages.asSequence()
+            .map { it.trim() }
+            .filter { isValidPackageName(it) }
+            .toSet()
+
+    private val PACKAGE_NAME_REGEX = Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$")
 }
