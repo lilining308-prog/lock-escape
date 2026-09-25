@@ -29,17 +29,22 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 | 能力块 | 参考项目 | 许可证 | 核实状态 |
 |--------|---------|--------|---------|
 | 物理按键监听 | F111111shhh/Extinguish（fork 自 Moderpach/Extinguish） | GPL-3.0 | 已核实 |
-| 无障碍窗口监控 | hnpdsyn/PhoneGuard | 无 LICENSE | 仓库无许可证文件，仅参考思路未复制代码 |
 | 全屏覆盖 | coderlidy/Fake-Lock-Screen | MIT | 已核实 |
-| 紧急触发参考 | me.lucky/wasted | 待核实 | 仓库当前 404 不可访问 |
 | root 权限通道 | RikkaApps/Shizuku | Apache-2.0 | 已核实 |
 | 停用/冻结实现 | aistra0528/Hail | GPL-3.0 | 已核实 |
+
+## 未采用 / 合规排除来源
+
+| 项目 | 风险原因 | 当前处理 |
+|------|----------|----------|
+| hnpdsyn/PhoneGuard | 仓库无 LICENSE 文件，无法确认复制、修改、再分发授权 | 已确认排除：不复制、不改写、不复用源码，也不作为实现依据 |
+| me.lucky/wasted | 仓库当前 404，许可证无法核实 | 已确认排除：不复制、不改写、不复用源码，也不作为实现依据 |
 
 ## 开源许可与合规
 
 - 本项目主许可证为 **GPL-3.0**（见 [LICENSE](LICENSE)）。
 - 上游参考项目的版权归属与完整许可文本见 [NOTICE](NOTICE)，项目清单与合规说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
-- `hnpdsyn/PhoneGuard` 无 LICENSE 文件，本项目未复制其代码；`me.lucky/wasted` 仓库不可访问，许可证待核实。
+- `hnpdsyn/PhoneGuard` 与 `me.lucky/wasted` 已列为“未采用 / 合规排除来源”：不得复制、改写或直接复用其源码；当前实现仅使用 Android SDK 公开 API、Shizuku 依赖和本项目原创 GPL-3.0 代码。
 - 源码随仓库公开，点击可直接查看源码目录：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。分发 APK 时应同时提供源码目录链接、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
 - 所有原创源码按 GPL-3.0 分发，源码文件保留 GPL 头部声明；资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目发布。
 - APK 内已打包 GPL 与源码公开说明，路径为 `assets/GPL/`：`LICENSE-GPL-3.0.txt`、`NOTICE.txt`、`THIRD_PARTY_NOTICES.md`、`SOURCE_PATHS.md`、`README.md`、`APK-README.md`。
