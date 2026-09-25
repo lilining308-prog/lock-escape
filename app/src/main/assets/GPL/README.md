@@ -41,14 +41,10 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 - 上游参考项目的版权归属与完整许可文本见 [NOTICE](NOTICE)，项目清单与合规说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - `hnpdsyn/PhoneGuard` 无 LICENSE 文件，本项目未复制其代码；`me.lucky/wasted` 仓库不可访问，许可证待核实。
 - 源码随仓库公开，点击可直接查看源码目录：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。分发 APK 时应同时提供源码目录链接、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
-- 所有原创源码按 GPL-3.0 分发，源码文件保留 GPL 头部声明；资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目发布。
-- APK 内已打包 GPL 与源码公开说明，路径为 `assets/GPL/`：`LICENSE-GPL-3.0.txt`、`NOTICE.txt`、`THIRD_PARTY_NOTICES.md`、`SOURCE_PATHS.md`、`README.md`、`APK-README.md`。
 
 ## APK 下载
 
 面向普通用户，请下载：`apk/推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk`。
-
-root 用户或调试场景可下载：`apk/推荐下载-2.0正式版/锁机逃生-2.0-SU直接启动-GPL版.apk`。安装后桌面会出现“锁机逃生 SU直启”入口，启动即进入 Root/SU 优先逃生控制台。
 
 更多 APK 分类、历史版本和调试版说明见 [apk/README.md](apk/README.md)。
 
@@ -59,7 +55,6 @@ root 用户或调试场景可下载：`apk/推荐下载-2.0正式版/锁机逃�
 - 本地源码路径：`app/src/main/java/com/lilining/lockescape/`
 - 本地测试源码路径：`app/src/test/java/com/lilining/lockescape/`
 - 源码目录说明文件：`app/src/main/java/README.md`
-- APK 内置源码公开说明：`app/src/main/assets/GPL/SOURCE_PATHS.md`，打包后位于 APK 的 `assets/GPL/SOURCE_PATHS.md`。
 
 ## 状态
 

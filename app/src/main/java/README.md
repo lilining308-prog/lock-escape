@@ -37,4 +37,6 @@
 
 ## 许可
 
-本项目主许可证为 GPL-3.0。源码文件保留 GPL 头部声明，完整许可证见仓库根目录 `LICENSE`。
+本项目主许可证为 GPL-3.0。所有原创源码必须按 GPL-3.0 公开，源码文件保留 GPL 头部声明，完整许可证见仓库根目录 `LICENSE`。
+
+APK 内置 GPL 与源码公开说明位于：`app/src/main/assets/GPL/`，打包后位于 APK 的 `assets/GPL/`。

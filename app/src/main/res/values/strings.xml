@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">锁机逃生</string>
-    <string name="root_launcher_label">锁机逃生 Root</string>
+    <string name="root_launcher_label">锁机逃生 SU直启</string>
     <string name="accessibility_service_label">锁机逃生（按键监听）</string>
     <string name="accessibility_service_description">监听音量键连击触发逃生，并读取当前顶层应用包名。</string>
 </resources>

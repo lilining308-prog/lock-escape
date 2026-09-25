@@ -19,3 +19,7 @@
 ```text
 gradle testDebugUnitTest
 ```
+
+## 许可
+
+测试源码同样按 GPL-3.0 公开，路径为 `app/src/test/java/com/lilining/lockescape/`。
