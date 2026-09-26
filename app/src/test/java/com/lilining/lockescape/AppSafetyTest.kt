@@ -58,6 +58,24 @@ class AppSafetyTest {
     }
 
     @Test
+    fun activeKeyboardNeverReplacesTrackedTarget() {
+        assertFalse(
+            AppSafety.shouldTrackTopPackage(
+                "com.google.android.inputmethod.latin",
+                emptySet(),
+                inputMethodPackage = "com.google.android.inputmethod.latin"
+            )
+        )
+        assertTrue(
+            AppSafety.shouldTrackTopPackage(
+                "com.example.risk",
+                emptySet(),
+                inputMethodPackage = "com.google.android.inputmethod.latin"
+            )
+        )
+    }
+
+    @Test
     fun packageNameValidationRejectsInvalidInput() {
         assertTrue(AppSafety.isValidPackageName("com.example.safe"))
         assertTrue(AppSafety.isValidPackageName("a.b_1.c2"))

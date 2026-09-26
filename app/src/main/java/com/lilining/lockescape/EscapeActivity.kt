@@ -48,6 +48,7 @@ class EscapeActivity : Activity() {
 
     private val scope = MainScope()
     private var suppressJob: Job? = null
+    private var actionJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +95,11 @@ class EscapeActivity : Activity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        refreshTopPackage()
+    }
+
     private fun dismissKeyguard() {
         val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
         if (km.isKeyguardLocked) {
@@ -104,12 +110,12 @@ class EscapeActivity : Activity() {
     private fun startSuppress() {
         stopSuppress()
         val pkg = Prefs.currentTopPackage(this)
-        if (pkg.isBlank()) {
+        if (pkg.isBlank() || !AppSafety.isValidPackageName(pkg)) {
             toast("尚未捕获到顶层应用包名，无法压制")
             binding.switchSuppress.isChecked = false
             return
         }
-        if (isSystemApp(pkg)) {
+        if (isSystemApp(pkg) || pkg == packageName) {
             toast("顶层是系统应用，禁止持续压制")
             binding.switchSuppress.isChecked = false
             return
@@ -122,6 +128,10 @@ class EscapeActivity : Activity() {
         binding.tvResult.text = "持续压制中：$pkg"
         suppressJob = scope.launch {
             while (isActive) {
+                if (isSystemApp(pkg) || pkg == packageName || isWhitelisted(pkg)) {
+                    binding.tvResult.text = "压制已停止：目标受保护或已加入白名单"
+                    break
+                }
                 val mode = Prefs.executionMode(this@EscapeActivity)
                 val (ok, out) = withContext(Dispatchers.IO) { ShellExecutor.forceStop(pkg, mode) }
                 if (!ok) {
@@ -130,6 +140,7 @@ class EscapeActivity : Activity() {
                 }
                 delay(SUPPRESS_INTERVAL_MS)
             }
+            binding.switchSuppress.isChecked = false
         }
         Prefs.addEscapeLog(this, "开启持续压制 $pkg")
     }
@@ -182,7 +193,7 @@ class EscapeActivity : Activity() {
 
     private fun whitelistCurrentPackage() {
         val pkg = Prefs.currentTopPackage(this)
-        if (pkg.isBlank()) {
+        if (pkg.isBlank() || !AppSafety.isValidPackageName(pkg)) {
             toast("尚未捕获到顶层应用包名")
             return
         }
@@ -258,11 +269,11 @@ class EscapeActivity : Activity() {
         action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>
     ) {
         val pkg = Prefs.currentTopPackage(this)
-        if (pkg.isBlank()) {
+        if (pkg.isBlank() || !AppSafety.isValidPackageName(pkg)) {
             toast("尚未捕获到顶层应用包名")
             return
         }
-        val system = isSystemApp(pkg)
+        val system = isSystemApp(pkg) || pkg == packageName
         if (isWhitelisted(pkg)) {
             AlertDialog.Builder(this)
                 .setTitle("已拦截：白名单应用")
@@ -294,8 +305,12 @@ class EscapeActivity : Activity() {
     }
 
     private fun execute(pkg: String, action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>) {
+        if (actionJob?.isActive == true || suppressJob?.isActive == true) {
+            toast("已有逃生操作正在执行，请等待完成")
+            return
+        }
         binding.tvResult.text = "执行中..."
-        scope.launch {
+        actionJob = scope.launch {
             val mode = Prefs.executionMode(this@EscapeActivity)
             val (ok, out) = withContext(Dispatchers.IO) { action(pkg, mode) }
             binding.tvResult.text = if (ok) "成功：$out" else "失败：$out"

@@ -54,6 +54,64 @@ class ShellExecutorTest {
     }
 
     @Test
+    fun autoModeDoesNotUseShizukuWithoutPermission() {
+        val calls = mutableListOf<String>()
+        val result = ShellExecutor.runForTest(
+            command = "id",
+            mode = ShellExecutor.Mode.AUTO,
+            shizukuAvailable = true,
+            shizukuAuthorized = false,
+            runShizuku = { calls.add("shizuku"); true to "shizuku" },
+            runSu = { calls.add("su"); true to "root" }
+        )
+
+        assertEquals(true to "root", result)
+        assertEquals(listOf("su"), calls)
+    }
+
+    @Test
+    fun protectedPackagesCannotBeDisabledOrUninstalledEvenThroughExecutor() {
+        assertFalse(ShellExecutor.disableForTest("com.android.systemui").first)
+        assertFalse(ShellExecutor.uninstallForTest("com.miui.home").first)
+        assertFalse(ShellExecutor.disableForTest("com.lilining.lockescape").first)
+        assertFalse(ShellExecutor.uninstallForTest("com.lilining.lockescape").first)
+    }
+
+    @Test
+    fun commandTimeoutTerminatesProcess() {
+        val process = if (System.getProperty("os.name")?.startsWith("Windows") == true) {
+            ProcessBuilder("cmd", "/c", "ping -n 8 127.0.0.1 > nul").start()
+        } else {
+            ProcessBuilder("sh", "-c", "sleep 8").start()
+        }
+        val result = ShellExecutor.waitForProcess(process, 100L)
+
+        assertFalse(result.first)
+        assertTrue(result.second?.contains("超时") == true)
+        assertFalse(process.isAlive)
+    }
+
+    @Test
+    fun processWithBrokenTimedWaitStillReturnsItsActualResult() {
+        val actual = ProcessBuilder("java", "-version").start()
+        val process = object : Process() {
+            override fun getOutputStream() = actual.outputStream
+            override fun getInputStream() = actual.inputStream
+            override fun getErrorStream() = actual.errorStream
+            override fun waitFor() = actual.waitFor()
+            override fun exitValue() = actual.exitValue()
+            override fun destroy() = actual.destroy()
+            override fun waitFor(timeout: Long, unit: java.util.concurrent.TimeUnit): Boolean =
+                throw IllegalArgumentException("process hasn't exited")
+        }
+
+        val result = ShellExecutor.waitForProcess(process, 5_000L)
+
+        assertTrue(result.first)
+        assertTrue(result.second.isNotBlank())
+    }
+
+    @Test
     fun suFallbackUsesAndroidEmulatorSyntaxWhenDashCFails() {
         val calls = mutableListOf<List<String>>()
         val result = ShellExecutor.runSuForTest("id") { args: Array<String> ->

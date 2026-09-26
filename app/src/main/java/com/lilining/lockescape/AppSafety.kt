@@ -50,11 +50,17 @@ object AppSafety {
 
     fun isProtectedPackage(pkg: String): Boolean = pkg in PROTECTED_PACKAGES
 
+    fun isDefaultWhitelistedPackage(pkg: String): Boolean = pkg in DEFAULT_WHITELIST_PACKAGES
+
     fun isWhitelistedPackage(pkg: String, userWhitelist: Set<String>): Boolean =
         pkg in DEFAULT_WHITELIST_PACKAGES || pkg in userWhitelist
 
-    fun shouldTrackTopPackage(pkg: String, userWhitelist: Set<String>): Boolean =
-        pkg.isNotBlank() && !isWhitelistedPackage(pkg, userWhitelist)
+    fun shouldTrackTopPackage(
+        pkg: String,
+        userWhitelist: Set<String>,
+        inputMethodPackage: String? = null
+    ): Boolean =
+        pkg.isNotBlank() && pkg != inputMethodPackage && !isWhitelistedPackage(pkg, userWhitelist)
 
     fun isValidPackageName(pkg: String): Boolean =
         PACKAGE_NAME_REGEX.matches(pkg.trim())

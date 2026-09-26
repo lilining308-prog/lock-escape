@@ -55,8 +55,31 @@ class VolumeKeyTriggerTest {
         val trigger = VolumeKeyTrigger()
 
         assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_UP, 1_000L).triggerEscape)
+        trigger.onVolumeUp(VolumeKeyTrigger.KEY_VOLUME_UP)
         assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_UP, 1_200L).triggerEscape)
+        trigger.onVolumeUp(VolumeKeyTrigger.KEY_VOLUME_UP)
         assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_DOWN, 1_400L).triggerEscape)
+        trigger.onVolumeUp(VolumeKeyTrigger.KEY_VOLUME_DOWN)
         assertTrue(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_UP, 1_600L).triggerEscape)
+    }
+
+    @Test
+    fun repeatedDownWithoutReleaseDoesNotCountAsMultipleTaps() {
+        val trigger = VolumeKeyTrigger()
+
+        assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_DOWN, 1_000L).triggerEscape)
+        assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_DOWN, 1_200L).triggerEscape)
+        assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_DOWN, 1_400L).triggerEscape)
+        assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_DOWN, 1_600L).triggerEscape)
+    }
+
+    @Test
+    fun slowPressesDoNotTriggerEscape() {
+        val trigger = VolumeKeyTrigger()
+
+        repeat(4) { index ->
+            assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_UP, 1_000L + index * 2_000L).triggerEscape)
+            trigger.onVolumeUp(VolumeKeyTrigger.KEY_VOLUME_UP)
+        }
     }
 }

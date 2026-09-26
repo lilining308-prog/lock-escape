@@ -21,7 +21,7 @@ import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import android.provider.Settings
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 
@@ -37,14 +37,12 @@ class EscapeAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
-        Log.i("EscapeA11y", "serviceInfo.flags=${serviceInfo.flags} FLAG_REQUEST_FILTER_KEY_EVENTS=${android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS}")
         // 启动前台保活服务
         startForegroundService(Intent(this, DaemonService::class.java))
     }
 
     override fun onKeyEvent(event: KeyEvent?): Boolean {
         event ?: return false
-        Log.i("EscapeA11y", "onKeyEvent: keyCode=${event.keyCode} action=${event.action} source=${event.source}")
         // 只处理音量键事件
         val isVolumeKey = event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
                 event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
@@ -73,8 +71,8 @@ class EscapeAccessibilityService : AccessibilityService() {
                 }
             }
         }
-        // 拦截音量键事件，避免误调音量
-        return true
+        // 只观察按键；普通调音量仍交给系统处理。
+        return false
     }
 
     private fun cancelLongPress() {
@@ -95,7 +93,11 @@ class EscapeAccessibilityService : AccessibilityService() {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val pkg = event.packageName?.toString()
             if (!pkg.isNullOrBlank() && pkg != packageName) {
-                if (AppSafety.shouldTrackTopPackage(pkg, Prefs.userWhitelist(this))) {
+                val inputMethodPackage = Settings.Secure.getString(
+                    contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD
+                )?.substringBefore('/')
+                if (pkg == inputMethodPackage) return
+                if (AppSafety.shouldTrackTopPackage(pkg, Prefs.userWhitelist(this), inputMethodPackage)) {
                     Prefs.saveCurrentTopPackage(this, pkg)
                 } else {
                     Prefs.clearCurrentTopPackage(this)
@@ -105,4 +107,9 @@ class EscapeAccessibilityService : AccessibilityService() {
     }
 
     override fun onInterrupt() = Unit
+
+    override fun onDestroy() {
+        cancelLongPress()
+        super.onDestroy()
+    }
 }
