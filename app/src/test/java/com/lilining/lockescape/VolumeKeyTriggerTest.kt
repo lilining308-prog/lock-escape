@@ -82,4 +82,13 @@ class VolumeKeyTriggerTest {
             trigger.onVolumeUp(VolumeKeyTrigger.KEY_VOLUME_UP)
         }
     }
+
+    @Test
+    fun fourPressesMustFitInOneAndHalfSecondTotal() {
+        val trigger = VolumeKeyTrigger()
+        repeat(4) { index ->
+            assertFalse(trigger.onVolumeDown(VolumeKeyTrigger.KEY_VOLUME_UP, 1_000L + index * 900L).triggerEscape)
+            trigger.onVolumeUp(VolumeKeyTrigger.KEY_VOLUME_UP)
+        }
+    }
 }

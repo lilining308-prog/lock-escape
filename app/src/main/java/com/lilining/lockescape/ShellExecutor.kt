@@ -63,7 +63,8 @@ object ShellExecutor {
     internal fun uninstallCommandForTest(pkg: String): String? = buildUninstallCommand(pkg)
 
     private fun buildForceStopCommand(pkg: String): String? =
-        normalizePackage(pkg)?.let { "am force-stop $it" }
+        normalizePackage(pkg)?.takeUnless { isCriticalPackage(it) }
+            ?.let { "am force-stop $it" }
 
     private fun buildDisableCommand(pkg: String): String? =
         normalizePackage(pkg)?.takeUnless { isCriticalPackage(it) }

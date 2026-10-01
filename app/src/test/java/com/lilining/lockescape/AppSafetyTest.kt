@@ -23,6 +23,20 @@ import org.junit.Test
 
 class AppSafetyTest {
     @Test
+    fun platformPhoneAndInputPackagesCannotBeTrackedAsSuspects() {
+        assertFalse(AppSafety.shouldTrackTopPackage("com.android.settings", emptySet()))
+        assertFalse(AppSafety.shouldTrackTopPackage("android", emptySet()))
+        assertFalse(AppSafety.shouldTrackTopPackage("com.google.android.apps.nexuslauncher", emptySet()))
+        assertFalse(AppSafety.shouldTrackTopPackage("not a package", emptySet()))
+    }
+
+    @Test
+    fun coreInputMethodAndShizukuRemainProtectedEvenIfMisidentified() {
+        assertFalse(ShellExecutor.forceStopForTest("com.google.android.inputmethod.latin").first)
+        assertFalse(ShellExecutor.disableForTest("moe.shizuku.privileged.api").first)
+        assertFalse(ShellExecutor.uninstallForTest("com.android.inputmethod.latin").first)
+    }
+    @Test
     fun criticalSystemPackagesAreProtected() {
         assertTrue(AppSafety.isProtectedPackage("com.android.systemui"))
         assertTrue(AppSafety.isProtectedPackage("com.android.settings"))

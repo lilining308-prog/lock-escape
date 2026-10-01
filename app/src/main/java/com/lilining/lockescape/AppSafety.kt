@@ -28,6 +28,10 @@ object AppSafety {
         "com.android.providers.media",
         "com.android.permissioncontroller",
         "com.google.android.permissioncontroller",
+        "com.android.inputmethod.latin",
+        "com.google.android.inputmethod.latin",
+        "moe.shizuku.privileged.api",
+        "moe.shizuku.manager",
         "com.android.launcher3",
         "com.google.android.apps.nexuslauncher",
         "com.google.android.gms"
@@ -60,7 +64,8 @@ object AppSafety {
         userWhitelist: Set<String>,
         inputMethodPackage: String? = null
     ): Boolean =
-        pkg.isNotBlank() && pkg != inputMethodPackage && !isWhitelistedPackage(pkg, userWhitelist)
+        isValidPackageName(pkg) && pkg != inputMethodPackage &&
+            !isProtectedPackage(pkg) && !isWhitelistedPackage(pkg, userWhitelist)
 
     fun isValidPackageName(pkg: String): Boolean =
         PACKAGE_NAME_REGEX.matches(pkg.trim())

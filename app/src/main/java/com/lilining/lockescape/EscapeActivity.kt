@@ -64,13 +64,13 @@ class EscapeActivity : Activity() {
         refreshTopPackage()
 
         binding.btnForceStop.setOnClickListener {
-            runAction("强停", "am force-stop 后该应用会立即退出，锁机病毒一般会重新拉起", true) { pkg, mode -> ShellExecutor.forceStop(pkg, mode) }
+            runAction("强停", "am force-stop 后该应用会立即退出，锁机病毒一般会重新拉起") { pkg, mode -> ShellExecutor.forceStop(pkg, mode) }
         }
         binding.btnDisable.setOnClickListener {
-            runAction("停用", "停用后应用将无法启动，用于永久压制锁机病毒", false) { pkg, mode -> ShellExecutor.disable(pkg, mode) }
+            runAction("停用", "停用后应用将无法启动，用于永久压制锁机病毒") { pkg, mode -> ShellExecutor.disable(pkg, mode) }
         }
         binding.btnUninstall.setOnClickListener {
-            runAction("卸载", "卸载后应用将被移除（用户 0 范围）", false) { pkg, mode -> ShellExecutor.uninstall(pkg, mode) }
+            runAction("卸载", "卸载后应用将被移除（用户 0 范围）") { pkg, mode -> ShellExecutor.uninstall(pkg, mode) }
         }
         binding.btnExit.setOnClickListener { finish() }
         binding.btnRefresh.setOnClickListener { refreshTopPackage() }
@@ -115,7 +115,7 @@ class EscapeActivity : Activity() {
             binding.switchSuppress.isChecked = false
             return
         }
-        if (isSystemApp(pkg) || pkg == packageName) {
+        if (isSystemApp(pkg) || pkg == packageName || AppSafety.isDefaultWhitelistedPackage(pkg)) {
             toast("顶层是系统应用，禁止持续压制")
             binding.switchSuppress.isChecked = false
             return
@@ -128,8 +128,9 @@ class EscapeActivity : Activity() {
         binding.tvResult.text = "持续压制中：$pkg"
         suppressJob = scope.launch {
             while (isActive) {
-                if (isSystemApp(pkg) || pkg == packageName || isWhitelisted(pkg)) {
-                    binding.tvResult.text = "压制已停止：目标受保护或已加入白名单"
+                if (Prefs.currentTopPackage(this@EscapeActivity) != pkg ||
+                    isSystemApp(pkg) || pkg == packageName || isWhitelisted(pkg)) {
+                    binding.tvResult.text = "压制已停止：目标失效、受保护或已加入白名单"
                     break
                 }
                 val mode = Prefs.executionMode(this@EscapeActivity)
@@ -152,7 +153,7 @@ class EscapeActivity : Activity() {
 
     private fun refreshTopPackage() {
         val pkg = Prefs.currentTopPackage(this)
-        val sb = StringBuilder("被锁应用：$pkg")
+        val sb = StringBuilder("最近目标应用：${pkg.ifBlank { "无（请切换到目标应用后触发逃生）" }}")
         if (isSystemApp(pkg)) {
             sb.append("\n⚠ 警告：这是系统关键应用，禁止停用/卸载！")
         }
@@ -265,7 +266,6 @@ class EscapeActivity : Activity() {
     private fun runAction(
         actionName: String,
         desc: String,
-        allowSystem: Boolean,
         action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>
     ) {
         val pkg = Prefs.currentTopPackage(this)
@@ -283,10 +283,10 @@ class EscapeActivity : Activity() {
                 .show()
             return
         }
-        if (system && !allowSystem) {
+        if (system) {
             AlertDialog.Builder(this)
                 .setTitle("已拦截：系统关键应用")
-                .setMessage("$pkg 是系统关键组件（桌面/系统UI/设置/电话等），停用或卸载可能导致设备不可用。")
+                .setMessage("$pkg 是系统关键组件或逃生工具，禁止执行 $actionName，以免设备不可用或失去逃生入口。")
                 .setPositiveButton("知道了", null)
                 .setNegativeButton("取消", null)
                 .setOnDismissListener { refreshTopPackage() }
@@ -295,9 +295,14 @@ class EscapeActivity : Activity() {
         }
         AlertDialog.Builder(this)
             .setTitle("确认$actionName")
-            .setMessage("将对 $pkg 执行：$actionName\n\n$desc" + if (system) "\n\n⚠ 该应用被识别为系统应用！" else "")
+            .setMessage("将对 $pkg 执行：$actionName\n\n$desc")
             .setPositiveButton("确认$actionName") { _, _ ->
-                execute(pkg, action)
+                if (Prefs.currentTopPackage(this) != pkg || isSystemApp(pkg) || pkg == packageName || isWhitelisted(pkg)) {
+                    toast("目标已变化或受保护，请重新确认")
+                    refreshTopPackage()
+                } else {
+                    execute(pkg, action)
+                }
             }
             .setNegativeButton("取消", null)
             .setOnDismissListener { refreshTopPackage() }
@@ -305,6 +310,10 @@ class EscapeActivity : Activity() {
     }
 
     private fun execute(pkg: String, action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>) {
+        if (Prefs.currentTopPackage(this) != pkg || isSystemApp(pkg) || pkg == packageName || isWhitelisted(pkg)) {
+            toast("目标已变化或受保护，请重新确认")
+            return
+        }
         if (actionJob?.isActive == true || suppressJob?.isActive == true) {
             toast("已有逃生操作正在执行，请等待完成")
             return

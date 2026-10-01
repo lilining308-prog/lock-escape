@@ -18,7 +18,7 @@
 package com.lilining.lockescape
 
 class VolumeKeyTrigger {
-    private var lastKeyTime = 0L
+    private var sequenceStartTime = 0L
     private var consecutiveCount = 0
     private var volumeDownPressed = false
     private var volumeUpPressed = false
@@ -36,15 +36,16 @@ class VolumeKeyTrigger {
             volumeUpPressed = true
         }
 
-        if (now - lastKeyTime > TRIGGER_WINDOW_MS) {
+        if (consecutiveCount == 0 || now - sequenceStartTime > TRIGGER_WINDOW_MS) {
             consecutiveCount = 0
+            sequenceStartTime = now
         }
-        lastKeyTime = now
         consecutiveCount++
 
         val triggerEscape = consecutiveCount >= TRIGGER_COUNT
         if (triggerEscape) {
             consecutiveCount = 0
+            sequenceStartTime = 0L
         }
 
         return Decision(
@@ -70,6 +71,7 @@ class VolumeKeyTrigger {
 
     fun resetAfterTrigger() {
         consecutiveCount = 0
+        sequenceStartTime = 0L
         volumeDownPressed = false
         volumeUpPressed = false
     }

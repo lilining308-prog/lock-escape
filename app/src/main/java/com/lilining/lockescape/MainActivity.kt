@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
             if (isAccessibilityEnabled()) "无障碍服务：已开启" else "无障碍服务：未开启"
         binding.tvShizukuStatus.text = shizukuStatusText()
         binding.tvBatteryStatus.text = batteryOptimizationText()
-        binding.tvCurrentTop.text = "当前顶层应用：" + Prefs.currentTopPackage(this).ifBlank { "未知（等待无障碍事件）" }
+        binding.tvCurrentTop.text = "最近目标应用：" + Prefs.currentTopPackage(this).ifBlank { "无（等待无障碍事件）" }
         val logs = Prefs.getEscapeLogs(this)
         binding.tvLogs.text = if (logs.isEmpty()) "暂无逃生记录" else logs.joinToString("\n")
     }

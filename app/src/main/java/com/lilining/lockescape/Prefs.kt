@@ -28,19 +28,28 @@ import java.util.Locale
 object Prefs {
     private const val NAME = "lock_escape_prefs"
     private const val KEY_TOP_PACKAGE = "top_package"
+    private const val KEY_TOP_OBSERVED_AT = "top_observed_at"
     private const val KEY_LOGS = "escape_logs"
     private const val KEY_EXECUTION_MODE = "execution_mode"
     private const val KEY_USER_WHITELIST = "user_whitelist"
     private const val MAX_LOGS = 20
 
     fun currentTopPackage(ctx: Context): String =
-        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
-            .getString(KEY_TOP_PACKAGE, "") ?: ""
+        lastObservedPackage(ctx).takeIf { isRecent(ctx) } ?: ""
+
+    private fun lastObservedPackage(ctx: Context): String =
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE).getString(KEY_TOP_PACKAGE, "") ?: ""
+
+    private fun isRecent(ctx: Context): Boolean {
+        val observedAt = ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE).getLong(KEY_TOP_OBSERVED_AT, 0L)
+        return observedAt > 0 && System.currentTimeMillis() - observedAt in 0..RescueTarget.EXPIRY_MS
+    }
 
     fun saveCurrentTopPackage(ctx: Context, pkg: String) {
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_TOP_PACKAGE, pkg)
+            .putLong(KEY_TOP_OBSERVED_AT, System.currentTimeMillis())
             .apply()
     }
 
@@ -48,6 +57,7 @@ object Prefs {
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
             .edit()
             .remove(KEY_TOP_PACKAGE)
+            .remove(KEY_TOP_OBSERVED_AT)
             .apply()
     }
 

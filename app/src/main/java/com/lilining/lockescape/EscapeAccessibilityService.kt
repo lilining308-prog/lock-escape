@@ -92,11 +92,18 @@ class EscapeAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val pkg = event.packageName?.toString()
-            if (!pkg.isNullOrBlank() && pkg != packageName) {
+            if (!pkg.isNullOrBlank()) {
                 val inputMethodPackage = Settings.Secure.getString(
                     contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD
                 )?.substringBefore('/')
-                if (pkg == inputMethodPackage) return
+                // The rescue console temporarily covers the suspect app. Keep the target
+                // until it expires; other windows revoke it to prevent stale targeting.
+                if (pkg == packageName) return
+                if (pkg == inputMethodPackage || AppSafety.isProtectedPackage(pkg) ||
+                    AppSafety.isDefaultWhitelistedPackage(pkg)) {
+                    Prefs.clearCurrentTopPackage(this)
+                    return
+                }
                 if (AppSafety.shouldTrackTopPackage(pkg, Prefs.userWhitelist(this), inputMethodPackage)) {
                     Prefs.saveCurrentTopPackage(this, pkg)
                 } else {

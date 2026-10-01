@@ -147,4 +147,13 @@ class ShellExecutorTest {
         assertEquals("pm disable-user --user 0 com.example.safe", ShellExecutor.disableCommandForTest("com.example.safe"))
         assertEquals("pm uninstall --user 0 com.example.safe", ShellExecutor.uninstallCommandForTest("com.example.safe"))
     }
+
+    @Test
+    fun forceStopNeverTargetsTheRescueAppOrCriticalSystemPackages() {
+        assertFalse(ShellExecutor.forceStopForTest("com.lilining.lockescape").first)
+        assertFalse(ShellExecutor.forceStopForTest("com.android.systemui").first)
+        assertFalse(ShellExecutor.forceStopForTest("com.android.settings").first)
+        assertFalse(ShellExecutor.forceStopForTest("com.miui.home").first)
+        assertTrue(ShellExecutor.forceStopForTest("com.example.locker").first)
+    }
 }
