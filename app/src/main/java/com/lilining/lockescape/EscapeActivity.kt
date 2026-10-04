@@ -64,13 +64,13 @@ class EscapeActivity : Activity() {
         refreshTopPackage()
 
         binding.btnForceStop.setOnClickListener {
-            runAction("强停", "am force-stop 后该应用会立即退出，锁机病毒一般会重新拉起") { pkg, mode -> ShellExecutor.forceStop(pkg, mode) }
+            runAction("强停", "am force-stop 后该应用会立即退出，锁机病毒一般会重新拉起") { pkg, mode -> ShellExecutor.forceStop(this, pkg, mode) }
         }
         binding.btnDisable.setOnClickListener {
-            runAction("停用", "停用后应用将无法启动，用于永久压制锁机病毒") { pkg, mode -> ShellExecutor.disable(pkg, mode) }
+            runAction("停用", "停用后应用将无法启动，用于永久压制锁机病毒") { pkg, mode -> ShellExecutor.disable(this, pkg, mode) }
         }
         binding.btnUninstall.setOnClickListener {
-            runAction("卸载", "卸载后应用将被移除（用户 0 范围）") { pkg, mode -> ShellExecutor.uninstall(pkg, mode) }
+            runAction("卸载", "卸载后应用将被移除（用户 0 范围）") { pkg, mode -> ShellExecutor.uninstall(this, pkg, mode) }
         }
         binding.btnExit.setOnClickListener { finish() }
         binding.btnRefresh.setOnClickListener { refreshTopPackage() }
@@ -125,16 +125,24 @@ class EscapeActivity : Activity() {
             binding.switchSuppress.isChecked = false
             return
         }
+        if (!Prefs.canActOn(this, pkg)) {
+            toast("目标已失效或属于默认桌面、输入法，禁止持续压制")
+            binding.switchSuppress.isChecked = false
+            return
+        }
         binding.tvResult.text = "持续压制中：$pkg"
         suppressJob = scope.launch {
             while (isActive) {
-                if (Prefs.currentTopPackage(this@EscapeActivity) != pkg ||
-                    isSystemApp(pkg) || pkg == packageName || isWhitelisted(pkg)) {
+                if (!Prefs.canActOn(this@EscapeActivity, pkg)) {
                     binding.tvResult.text = "压制已停止：目标失效、受保护或已加入白名单"
                     break
                 }
                 val mode = Prefs.executionMode(this@EscapeActivity)
-                val (ok, out) = withContext(Dispatchers.IO) { ShellExecutor.forceStop(pkg, mode) }
+                val (ok, out) = withContext(Dispatchers.IO) {
+                    if (Prefs.canActOn(this@EscapeActivity, pkg))
+                        ShellExecutor.forceStop(this@EscapeActivity, pkg, mode)
+                    else false to "目标已变化或受保护"
+                }
                 if (!ok) {
                     binding.tvResult.text = "压制失败：$out"
                     break
@@ -293,11 +301,16 @@ class EscapeActivity : Activity() {
                 .show()
             return
         }
+        if (!Prefs.canActOn(this, pkg)) {
+            toast("目标已失效或受保护，请重新确认")
+            refreshTopPackage()
+            return
+        }
         AlertDialog.Builder(this)
             .setTitle("确认$actionName")
             .setMessage("将对 $pkg 执行：$actionName\n\n$desc")
             .setPositiveButton("确认$actionName") { _, _ ->
-                if (Prefs.currentTopPackage(this) != pkg || isSystemApp(pkg) || pkg == packageName || isWhitelisted(pkg)) {
+                if (!Prefs.canActOn(this, pkg)) {
                     toast("目标已变化或受保护，请重新确认")
                     refreshTopPackage()
                 } else {
@@ -310,7 +323,7 @@ class EscapeActivity : Activity() {
     }
 
     private fun execute(pkg: String, action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>) {
-        if (Prefs.currentTopPackage(this) != pkg || isSystemApp(pkg) || pkg == packageName || isWhitelisted(pkg)) {
+        if (!Prefs.canActOn(this, pkg)) {
             toast("目标已变化或受保护，请重新确认")
             return
         }
@@ -321,7 +334,10 @@ class EscapeActivity : Activity() {
         binding.tvResult.text = "执行中..."
         actionJob = scope.launch {
             val mode = Prefs.executionMode(this@EscapeActivity)
-            val (ok, out) = withContext(Dispatchers.IO) { action(pkg, mode) }
+            val (ok, out) = withContext(Dispatchers.IO) {
+                if (Prefs.canActOn(this@EscapeActivity, pkg)) action(pkg, mode)
+                else false to "目标已变化或受保护，请重新确认"
+            }
             binding.tvResult.text = if (ok) "成功：$out" else "失败：$out"
             Prefs.addEscapeLog(this@EscapeActivity, if (ok) "成功[$mode]：$pkg -> $out" else "失败[$mode]：$pkg -> $out")
             refreshTopPackage()

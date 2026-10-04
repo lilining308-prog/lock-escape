@@ -263,10 +263,10 @@ Apache License
    limitations under the License.
 
 ================================================================
-5. 其他已核实项目（未复制代码，仅参考思路）
+5. 未采用的调研记录（不得作为实现依据）
 ================================================================
-- hnpdsyn/PhoneGuard：https://github.com/hnpdsyn/PhoneGuard —— 仓库无 LICENSE 文件，本项目仅参考其公开实现思路，未复制其代码，故无许可证文本可附。
-- me.lucky/wasted：https://github.com/me.lucky/wasted —— 仓库当前无法访问（HTTP 404），许可证无法核实，本项目未复制其代码。
+- hnpdsyn/PhoneGuard：https://github.com/hnpdsyn/PhoneGuard —— 仓库无 LICENSE 文件，未采用其源码，也不作为实现依据；此处仅保留排除记录。
+- me.lucky/wasted：https://github.com/me.lucky/wasted —— 许可证无法核实，未采用其源码，也不作为实现依据；此处仅保留排除记录。
 
 ================================================================
 附注

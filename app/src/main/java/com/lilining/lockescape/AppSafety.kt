@@ -68,7 +68,7 @@ object AppSafety {
             !isProtectedPackage(pkg) && !isWhitelistedPackage(pkg, userWhitelist)
 
     fun isValidPackageName(pkg: String): Boolean =
-        PACKAGE_NAME_REGEX.matches(pkg.trim())
+        PACKAGE_NAME_REGEX.matches(pkg)
 
     fun normalizeUserWhitelist(packages: Set<String>): Set<String> =
         packages.asSequence()

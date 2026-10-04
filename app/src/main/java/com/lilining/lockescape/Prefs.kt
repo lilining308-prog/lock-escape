@@ -37,6 +37,16 @@ object Prefs {
     fun currentTopPackage(ctx: Context): String =
         lastObservedPackage(ctx).takeIf { isRecent(ctx) } ?: ""
 
+    /** Revalidate the observed target and current whitelist immediately before each action. */
+    fun canActOn(ctx: Context, pkg: String): Boolean {
+        val sp = ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+        val observedAt = sp.getLong(KEY_TOP_OBSERVED_AT, 0L)
+        val whitelist = userWhitelist(ctx)
+        return sp.getString(KEY_TOP_PACKAGE, "") == pkg && observedAt > 0L &&
+            System.currentTimeMillis() - observedAt in 0..RescueTarget.EXPIRY_MS &&
+            ProtectedTargets.from(ctx).canActOn(pkg, whitelist)
+    }
+
     private fun lastObservedPackage(ctx: Context): String =
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE).getString(KEY_TOP_PACKAGE, "") ?: ""
 

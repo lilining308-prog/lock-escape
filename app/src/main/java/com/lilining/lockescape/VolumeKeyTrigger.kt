@@ -24,6 +24,7 @@ class VolumeKeyTrigger {
     private var volumeUpPressed = false
 
     fun onVolumeDown(keyCode: Int, now: Long, isRepeat: Boolean = false): Decision {
+        if (keyCode != KEY_VOLUME_DOWN && keyCode != KEY_VOLUME_UP) return Decision(false, false, false)
         if (isRepeat || (keyCode == KEY_VOLUME_DOWN && volumeDownPressed) ||
             (keyCode == KEY_VOLUME_UP && volumeUpPressed)) {
             return Decision(scheduleLongPress = false, cancelLongPress = false, triggerEscape = false)
@@ -36,7 +37,7 @@ class VolumeKeyTrigger {
             volumeUpPressed = true
         }
 
-        if (consecutiveCount == 0 || now - sequenceStartTime > TRIGGER_WINDOW_MS) {
+        if (consecutiveCount == 0 || now < sequenceStartTime || now - sequenceStartTime > TRIGGER_WINDOW_MS) {
             consecutiveCount = 0
             sequenceStartTime = now
         }
@@ -72,8 +73,6 @@ class VolumeKeyTrigger {
     fun resetAfterTrigger() {
         consecutiveCount = 0
         sequenceStartTime = 0L
-        volumeDownPressed = false
-        volumeUpPressed = false
     }
 
     data class Decision(

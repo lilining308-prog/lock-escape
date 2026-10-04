@@ -1,18 +1,20 @@
 # APK 下载说明
 
-## 推荐下载
+**许可核查状态：暂停推荐下载。** 以下文件均是已提交的历史二进制；尚未核实每个 APK 与其完整对应源码、第三方依赖许可材料的对应关系。目录和文件名中的“推荐”“正式版”“当前”均不代表当前通过许可核查。取得对应源码和完整材料并验证后，才能重新标为推荐。
+
+## 历史“推荐下载”目录（当前暂停推荐）
 
 | 文件 | 版本 | 用途 | 建议 |
 |------|------|------|------|
-| `推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk` | 2.0 正式版 | 普通用户安装 | 推荐下载这个 |
-| `推荐下载-2.0正式版/锁机逃生-2.0-SU直接启动-GPL版.apk` | 2.0 SU 直启 GPL 版 | 安装后使用“锁机逃生 SU直启”入口，直接进入 Root/SU 优先逃生控制台 | root 用户推荐 |
+| `推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk` | 2.0 历史构建 | 历史留档 | 暂停推荐，待许可核查 |
+| `推荐下载-2.0正式版/锁机逃生-2.0-SU直接启动-GPL版.apk` | 2.0 历史构建 | 与上一行 SHA-256 相同，历史别名 | 暂停推荐，待许可核查 |
 
 ## 开发测试
 
 | 文件 | 版本 | 用途 | 建议 |
 |------|------|------|------|
 | `调试版-开发测试/锁机逃生-2.0调试版-开发测试.apk` | 2.0 调试版 | ADB 调试、开发测试 | 普通用户不要下 |
-| `调试版-开发测试/app-debug-当前调试版.apk` | 当前源码构建的调试版 | 包含最新防误操作改动，仅用于开发测试 | 普通用户不要下 |
+| `调试版-开发测试/app-debug-当前调试版.apk` | 历史调试版 | 不包含本地未提交的优化，仅用于开发测试 | 不作为当前构建分发 |
 
 ## 历史版本
 
@@ -24,23 +26,27 @@
 
 根目录仍保留原文件名，避免旧链接失效：
 
-- `lock-escape-v2.0-official.apk`：2.0 正式版，推荐。
-- `lock-escape-v2.0-su-direct-gpl.apk`：2.0 SU 直接启动 GPL 版，安装后使用“锁机逃生 SU直启”入口。
-- `lock-escape-v2.0-release.apk`：2.0 release 构建，等同正式版。
+- `lock-escape-v2.0-official.apk`：2.0 历史构建，暂停推荐。
+- `lock-escape-v2.0-su-direct-gpl.apk`：历史正式包的相同字节别名，暂停推荐。
+- `lock-escape-v2.0-release.apk`：与历史 2.0 正式包 SHA-256 相同，不表示新版发布。
 - `lock-escape-v2.0-debug.apk`：2.0 调试版，仅开发测试。
-- `app-debug.apk`：当前源码构建的调试版，保留原路径；不等同于上方推荐的 2.0 正式版。
+- `app-debug.apk`：历史调试版，保留原路径；不等同于当前工作区构建，也不等同于 2.0 历史正式包。
 - `lock-escape-v0.1.0-debug.apk`：历史调试版，不推荐。
 
 ## 源码公开与许可
 
-- 本项目源码随仓库公开，点击可直接查看源码目录：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。
+以下 `main` 链接指向线上已提交源码。仓库内 `apk/` 的文件是已构建产物，不能据此认定其内容与本地未提交的开发改动一致；分发每个 APK 时应同时提供该版本对应的完整源码和构建脚本。
+
+已提交 APK 的 SHA-256、同内容别名及最早包含其当前字节的提交见 [APK源码对应表](../docs/APK源码对应表.md)。旧版 APK 内置的 `NOTICE` 可能保留过时表述，应另行随包提供本仓库根目录的更正版本 `NOTICE`；历史 `0.1.0` APK 无内置 GPL 材料，分发时必须包外补齐。
+
+- 仓库中已提交的源码可从 [主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java) 和 [测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java) 查阅；这些不断变化的 `main` 链接不等于历史 APK 的对应源码版本。
 - 当前开发版本地源码路径：`app/src/main/java/com/lilining/lockescape/`。
 - 当前开发版本地测试源码路径：`app/src/test/java/com/lilining/lockescape/`。
 - 主许可证为 GPL-3.0，全文见仓库根目录 `LICENSE`。
 - 第三方声明见仓库根目录 `THIRD_PARTY_NOTICES.md` 与 `NOTICE`。
 - 分发 APK 时应同时提供源码仓库地址、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
 - 所有原创源码、资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目公开。
-- APK 内置 GPL 与源码公开说明，路径为 `assets/GPL/`。打包内容包括：`LICENSE-GPL-3.0.txt`、`NOTICE.txt`、`THIRD_PARTY_NOTICES.md`、`SOURCE_PATHS.md`、`README.md`、`APK-README.md`。
+- 2.0 历史 APK 中能找到 `assets/GPL/`，但内置 NOTICE 是旧版；0.1.0 历史包没有该目录。具体清单与缺口见 [APK源码对应表](../docs/APK源码对应表.md)。
 
 ## APK 声明核查
 

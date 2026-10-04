@@ -45,19 +45,22 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 - 本项目主许可证为 **GPL-3.0**（见 [LICENSE](LICENSE)）。
 - 上游参考项目的版权归属与完整许可文本见 [NOTICE](NOTICE)，项目清单与合规说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - `hnpdsyn/PhoneGuard` 与 `me.lucky/wasted` 已列为“未采用 / 合规排除来源”：不得复制、改写或直接复用其源码；当前实现仅使用 Android SDK 公开 API、Shizuku 依赖和本项目原创 GPL-3.0 代码。
-- 源码随仓库公开，点击可直接查看源码目录：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。分发 APK 时应同时提供源码目录链接、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
+- 仓库公开已提交源码：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。分发 APK 时须提供与该 APK 对应的源码版本、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`；仅提供 `main` 链接不足以证明源码对应关系。
 - 所有原创源码按 GPL-3.0 分发，源码文件保留 GPL 头部声明；资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目发布。
-- APK 内已打包 GPL 与源码公开说明，路径为 `assets/GPL/`：`LICENSE-GPL-3.0.txt`、`NOTICE.txt`、`THIRD_PARTY_NOTICES.md`、`SOURCE_PATHS.md`、`README.md`、`APK-README.md`。
+- 当前构建的 APK 在 `assets/GPL/` 中打包许可与源码获取说明；历史 `0.1.0` 包没有该目录，各历史包的材料状态见 [APK源码对应表](docs/APK源码对应表.md)。
 
 ## APK 下载
 
-面向普通用户，请下载：`apk/推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk`。
+`apk/` 内保存的安装包为历史构建。对应源码和第三方依赖许可尚未逐包核实，当前不推荐作为已完成许可核查的发布版本下载或再分发。原“推荐下载”目录名仅为历史文件名，不代表当前核查结论。
 
-root 用户或调试场景可下载：`apk/推荐下载-2.0正式版/锁机逃生-2.0-SU直接启动-GPL版.apk`。安装后桌面会出现“锁机逃生 SU直启”入口，启动即进入 Root/SU 优先逃生控制台。
+历史 `0.1.0` 包缺少内置许可材料，已发布的 `2.0` 包仍包含过时 NOTICE；详细差异与待核项见 [APK源码对应表](docs/APK源码对应表.md)。
 
 更多 APK 分类、历史版本和调试版说明见 [apk/README.md](apk/README.md)。
+每个已跟踪 APK 的 SHA-256 与源码溯源线索见 [docs/APK源码对应表.md](docs/APK源码对应表.md)；不同 APK 不得仅凭相同版本号视为同一构建。
 
 ## 当前开发版源码
+
+工作区中未提交的改动不会出现在以下 `main` 链接，也不会自动进入 `apk/` 中已发布的安装包；发布新版 APK 时，应提供与该 APK 构建版本对应的完整源码、构建脚本和许可材料。
 
 - 当前开发版主源码目录：[app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)
 - 当前开发版测试源码目录：[app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)
@@ -85,6 +88,10 @@ root 用户或调试场景可下载：`apk/推荐下载-2.0正式版/锁机逃�
 ## 触发方式
 
 目标识别依赖用户开启无障碍服务；只有在目标应用成为前台窗口后触发逃生，才会保留其包名。系统设置、桌面、系统组件和输入法窗口会清除之前的目标；逃生界面自身不会覆盖目标。记录超过 2 分钟自动失效，防止误操作旧目标。按键触发只是打开人工确认界面，不会自动卸载或停用任何应用。
+
+执行前会再次校验目标包名、最近捕获时间、用户白名单、当前默认桌面和当前输入法；目标变更或失效则停止操作。命令输出中出现失败提示、输出读取不完整或超时，都不会报告为成功；停用和卸载还需收到包管理器对应的成功回执。Shizuku 命令已经发出但结果未知时，不会通过 root 重复执行。
+
+守护服务在 Android 14 及以上使用 `specialUse` 前台服务类型；在旧版本使用系统支持的普通前台服务启动方式。
 
 执行强停、停用、卸载需要已授权的 Shizuku 或 root；未授权时不会绕过 Android 权限限制。系统关键组件、默认桌面、输入法、Shizuku 和本工具都禁止通过工具操作。请勿将目标画像评分视作病毒鉴定结果。
 

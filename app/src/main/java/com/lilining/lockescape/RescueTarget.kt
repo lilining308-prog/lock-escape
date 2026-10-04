@@ -17,7 +17,7 @@ class RescueTarget {
             clear()
             return
         }
-        if (isActionable(pkg, ownPackage, whitelist)) {
+        if (isActionable(pkg, ownPackage, whitelist, inputMethodPackage)) {
             packageName = pkg
             observedAt = nowMs
         } else {
@@ -28,9 +28,14 @@ class RescueTarget {
     fun current(nowMs: Long = System.currentTimeMillis()): String =
         if (observedAt != 0L && nowMs >= observedAt && nowMs - observedAt <= EXPIRY_MS) packageName else ""
 
-    fun isActionable(pkg: String, ownPackage: String, whitelist: Set<String>): Boolean =
-        pkg != ownPackage && AppSafety.isValidPackageName(pkg) &&
+    fun isActionable(pkg: String, ownPackage: String, whitelist: Set<String>,
+                     inputMethodPackage: String? = null): Boolean =
+        pkg != ownPackage && pkg != inputMethodPackage && AppSafety.isValidPackageName(pkg) &&
             !AppSafety.isProtectedPackage(pkg) && !AppSafety.isWhitelistedPackage(pkg, whitelist)
+
+    fun canActOn(pkg: String, ownPackage: String, whitelist: Set<String>,
+                 inputMethodPackage: String? = null, nowMs: Long = System.currentTimeMillis()): Boolean =
+        current(nowMs) == pkg && isActionable(pkg, ownPackage, whitelist, inputMethodPackage)
 
     fun clear() {
         packageName = ""

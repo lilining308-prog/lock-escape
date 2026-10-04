@@ -1,11 +1,13 @@
 # APK 下载说明
 
-## 推荐下载
+**许可核查状态：暂停推荐。** 本文件随 APK 打包，但历史文件名不能证明完整对应源码与第三方依赖许可材料已经逐包核实。以下“推荐”均为历史命名。
+
+## 历史“推荐下载”目录（当前暂停推荐）
 
 | 文件 | 版本 | 用途 | 建议 |
 |------|------|------|------|
-| `推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk` | 2.0 正式版 | 普通用户安装 | 推荐下载这个 |
-| `推荐下载-2.0正式版/锁机逃生-2.0-SU直接启动-GPL版.apk` | 2.0 SU 直启 GPL 版 | 安装后使用“锁机逃生 SU直启”入口，直接进入 Root/SU 优先逃生控制台 | root 用户推荐 |
+| `推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk` | 2.0 历史构建 | 历史留档 | 暂停推荐 |
+| `推荐下载-2.0正式版/锁机逃生-2.0-SU直接启动-GPL版.apk` | 相同 SHA-256 的历史别名 | 历史留档 | 暂停推荐 |
 
 ## 开发测试
 
@@ -24,23 +26,25 @@
 
 根目录仍保留原文件名，避免旧链接失效：
 
-- `lock-escape-v2.0-official.apk`：2.0 正式版，推荐。
-- `lock-escape-v2.0-su-direct-gpl.apk`：2.0 SU 直接启动 GPL 版，安装后使用“锁机逃生 SU直启”入口。
-- `lock-escape-v2.0-release.apk`：2.0 release 构建，等同正式版。
+- `lock-escape-v2.0-official.apk`：2.0 历史构建，暂停推荐。
+- `lock-escape-v2.0-su-direct-gpl.apk`：历史正式包的相同字节别名，暂停推荐。
+- `lock-escape-v2.0-release.apk`：与历史正式包 SHA-256 相同，非新版构建。
 - `lock-escape-v2.0-debug.apk`：2.0 调试版，仅开发测试。
-- `app-debug.apk`：当前调试版，保留原路径。
+- `app-debug.apk`：历史调试版，保留原路径，并非当前工作区构建。
 - `lock-escape-v0.1.0-debug.apk`：历史调试版，不推荐。
 
 ## 源码公开与许可
 
-- 本项目源码随仓库公开，点击可直接查看源码目录：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。
+本文件随不同批次 APK 一起打包，文件名/版本号不能用于确定源码版本。下载页应同时列明该 APK 的 SHA-256、对应源码提交或源码压缩包及构建脚本；`main` 链接仅指向当前已提交代码。
+
+- 已提交源码可从 [主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java) 和 [测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java) 查阅；这些不断变化的 `main` 链接不等于历史 APK 的对应源码版本。
 - 当前开发版本地源码路径：`app/src/main/java/com/lilining/lockescape/`。
 - 当前开发版本地测试源码路径：`app/src/test/java/com/lilining/lockescape/`。
 - 主许可证为 GPL-3.0，全文见仓库根目录 `LICENSE`。
 - 第三方声明见仓库根目录 `THIRD_PARTY_NOTICES.md` 与 `NOTICE`。
 - 分发 APK 时应同时提供源码仓库地址、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
 - 所有原创源码、资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目公开。
-- APK 内置 GPL 与源码公开说明，路径为 `assets/GPL/`。打包内容包括：`LICENSE-GPL-3.0.txt`、`NOTICE.txt`、`THIRD_PARTY_NOTICES.md`、`SOURCE_PATHS.md`、`README.md`、`APK-README.md`。
+- 包含本文件的 APK 在 `assets/GPL/` 中内置许可材料，但这不代表所有历史 APK 均已包含，也不代表其中的说明与当前源码一一对应。
 
 ## APK 声明核查
 

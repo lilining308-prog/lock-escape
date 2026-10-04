@@ -18,11 +18,12 @@
 package com.lilining.lockescape
 
 import android.content.pm.PackageManager
-import android.util.Log
+import android.content.Context
 import rikka.shizuku.Shizuku
 import java.io.DataOutputStream
 import java.io.IOException
 import java.util.concurrent.FutureTask
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -38,23 +39,23 @@ object ShellExecutor {
         ROOT
     }
 
-    fun forceStop(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
-        buildForceStopCommand(pkg)?.let { run(it, mode) } ?: invalidPackage(pkg)
+    fun forceStop(ctx: Context, pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
+        buildForceStopCommand(pkg, ProtectedTargets.from(ctx))?.let { run(it, mode) } ?: invalidPackage(pkg)
 
-    fun disable(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
-        buildDisableCommand(pkg)?.let { run(it, mode) } ?: unsafePackage(pkg)
+    fun disable(ctx: Context, pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
+        buildDisableCommand(pkg, ProtectedTargets.from(ctx))?.let { run(it, mode) } ?: unsafePackage(pkg)
 
-    fun uninstall(pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
-        buildUninstallCommand(pkg)?.let { run(it, mode) } ?: unsafePackage(pkg)
+    fun uninstall(ctx: Context, pkg: String, mode: Mode = Mode.AUTO): Pair<Boolean, String> =
+        buildUninstallCommand(pkg, ProtectedTargets.from(ctx))?.let { run(it, mode) } ?: unsafePackage(pkg)
 
-    internal fun forceStopForTest(pkg: String): Pair<Boolean, String> =
-        buildForceStopCommand(pkg)?.let { true to it } ?: invalidPackage(pkg)
+    internal fun forceStopForTest(pkg: String, policy: ProtectedTargets? = null): Pair<Boolean, String> =
+        buildForceStopCommand(pkg, policy)?.let { true to it } ?: invalidPackage(pkg)
 
-    internal fun disableForTest(pkg: String): Pair<Boolean, String> =
-        buildDisableCommand(pkg)?.let { true to it } ?: unsafePackage(pkg)
+    internal fun disableForTest(pkg: String, policy: ProtectedTargets? = null): Pair<Boolean, String> =
+        buildDisableCommand(pkg, policy)?.let { true to it } ?: unsafePackage(pkg)
 
-    internal fun uninstallForTest(pkg: String): Pair<Boolean, String> =
-        buildUninstallCommand(pkg)?.let { true to it } ?: unsafePackage(pkg)
+    internal fun uninstallForTest(pkg: String, policy: ProtectedTargets? = null): Pair<Boolean, String> =
+        buildUninstallCommand(pkg, policy)?.let { true to it } ?: unsafePackage(pkg)
 
     internal fun forceStopCommandForTest(pkg: String): String? = buildForceStopCommand(pkg)
 
@@ -62,22 +63,20 @@ object ShellExecutor {
 
     internal fun uninstallCommandForTest(pkg: String): String? = buildUninstallCommand(pkg)
 
-    private fun buildForceStopCommand(pkg: String): String? =
-        normalizePackage(pkg)?.takeUnless { isCriticalPackage(it) }
+    private fun buildForceStopCommand(pkg: String, policy: ProtectedTargets? = null): String? =
+        normalizePackage(pkg)?.takeUnless { isCriticalPackage(it) || policy?.canActOn(it, emptySet()) == false }
             ?.let { "am force-stop $it" }
 
-    private fun buildDisableCommand(pkg: String): String? =
-        normalizePackage(pkg)?.takeUnless { isCriticalPackage(it) }
+    private fun buildDisableCommand(pkg: String, policy: ProtectedTargets? = null): String? =
+        normalizePackage(pkg)?.takeUnless { isCriticalPackage(it) || policy?.canActOn(it, emptySet()) == false }
             ?.let { "pm disable-user --user 0 $it" }
 
-    private fun buildUninstallCommand(pkg: String): String? =
-        normalizePackage(pkg)?.takeUnless { isCriticalPackage(it) }
+    private fun buildUninstallCommand(pkg: String, policy: ProtectedTargets? = null): String? =
+        normalizePackage(pkg)?.takeUnless { isCriticalPackage(it) || policy?.canActOn(it, emptySet()) == false }
             ?.let { "pm uninstall --user 0 $it" }
 
-    private fun normalizePackage(pkg: String): String? {
-        val normalized = pkg.trim()
-        return normalized.takeIf { AppSafety.isValidPackageName(it) }
-    }
+    private fun normalizePackage(pkg: String): String? =
+        pkg.takeIf { AppSafety.isValidPackageName(it) }
 
     private fun invalidPackage(pkg: String): Pair<Boolean, String> =
         false to "包名不合法，已拒绝执行：$pkg"
@@ -131,19 +130,41 @@ object ShellExecutor {
     }
 
     private fun runViaShizuku(cmd: String): Pair<Boolean, String> {
-        return try {
-            // Shizuku 13.x 将 newProcess 设为私有，这里反射调用（返回 Process 子类）
-            val method = Shizuku::class.java.getDeclaredMethod(
-                "newProcess",
-                Array<String>::class.java, Array<String>::class.java, String::class.java
-            )
-            method.isAccessible = true
-            val process = method.invoke(null, arrayOf("sh", "-c", cmd), null, null) as Process
-            waitForProcess(process)
+        return runShizukuProcess(
+            create = {
+                // Shizuku 13.x 将 newProcess 设为私有，这里反射调用（返回 Process 子类）
+                val method = Shizuku::class.java.getDeclaredMethod(
+                    "newProcess",
+                    Array<String>::class.java, Array<String>::class.java, String::class.java
+                )
+                method.isAccessible = true
+                method.invoke(null, arrayOf("sh", "-c", cmd), null, null) as Process
+            },
+            await = { process -> waitForProcess(process, command = cmd) },
+            fallback = { runViaSu(cmd) }
+        )
+    }
+
+    internal fun runShizukuProcessForTest(
+        create: () -> Process,
+        await: (Process) -> Pair<Boolean, String>,
+        fallback: () -> Pair<Boolean, String>
+    ): Pair<Boolean, String> = runShizukuProcess(create, await, fallback)
+
+    private fun runShizukuProcess(
+        create: () -> Process,
+        await: (Process) -> Pair<Boolean, String>,
+        fallback: () -> Pair<Boolean, String>
+    ): Pair<Boolean, String> {
+        val process = try {
+            create()
         } catch (e: Exception) {
-            Log.e("LockEscapeShizuku", "Shizuku process invocation failed", e)
-            // Shizuku 通道失败时降级 su
-            runViaSu(cmd)
+            return fallback()
+        }
+        return try {
+            await(process)
+        } catch (e: Exception) {
+            false to "Shizuku 命令结果未知，未通过 root 重复执行：${e.message ?: e.javaClass.simpleName}"
         }
     }
 
@@ -151,7 +172,7 @@ object ShellExecutor {
         return try {
             runSuCommand(cmd) { args ->
                 val process = Runtime.getRuntime().exec(args)
-                waitForProcess(process)
+                waitForProcess(process, command = cmd)
             }
         } catch (e: IOException) {
             Pair(false, "root 不可用（su 不可用）")
@@ -163,15 +184,22 @@ object ShellExecutor {
         exec: (Array<String>) -> Pair<Boolean, String>
     ): Pair<Boolean, String> {
         val primary = exec(arrayOf("su", "-c", cmd))
-        if (primary.first || !primary.second.contains("invalid uid/gid", ignoreCase = true)) {
+        if (primary.first || !primary.second.trim().matches(
+                Regex("(?i)^su: invalid uid/gid ['\"]?-c['\"]?$"))) {
             return primary
         }
         return exec(arrayOf("su", "0", "sh", "-c", cmd))
     }
 
-    internal fun waitForProcess(process: Process, timeoutMs: Long = COMMAND_TIMEOUT_MS): Pair<Boolean, String> {
+    internal fun waitForProcess(
+        process: Process,
+        timeoutMs: Long = COMMAND_TIMEOUT_MS,
+        command: String = ""
+    ): Pair<Boolean, String> {
         val output = StringBuilder()
         val error = StringBuilder()
+        val truncated = java.util.concurrent.atomic.AtomicBoolean(false)
+        val readFailure = java.util.concurrent.atomic.AtomicBoolean(false)
         fun drain(stream: java.io.InputStream, destination: StringBuilder): Thread = Thread {
             try {
                 stream.bufferedReader().use { reader ->
@@ -180,12 +208,17 @@ object ShellExecutor {
                         val count = reader.read(buffer)
                         if (count < 0) break
                         if (destination.length < MAX_OUTPUT_CHARS) {
-                            destination.append(buffer, 0, minOf(count, MAX_OUTPUT_CHARS - destination.length))
+                            val saved = minOf(count, MAX_OUTPUT_CHARS - destination.length)
+                            destination.append(buffer, 0, saved)
+                            if (saved < count) truncated.set(true)
+                        } else {
+                            truncated.set(true)
                         }
                     }
                 }
             } catch (_: IOException) {
                 // Destroying a timed-out process can close its streams.
+                readFailure.set(true)
             }
         }.apply { isDaemon = true; start() }
 
@@ -199,20 +232,62 @@ object ShellExecutor {
             val exit = try {
                 completion.get(timeoutMs, TimeUnit.MILLISECONDS)
             } catch (_: TimeoutException) {
-                process.destroyForcibly()
-                completion.cancel(true)
+                try {
+                    process.destroyForcibly()
+                } catch (_: Exception) {
+                    // The remote process may already have exited or disconnected.
+                } finally {
+                    completion.cancel(true)
+                }
                 return false to "命令超时，请检查 root/Shizuku 授权或重试"
+            } catch (e: ExecutionException) {
+                try {
+                    process.destroyForcibly()
+                } catch (_: Exception) { }
+                return false to "命令执行中断，结果未知：${e.cause?.message ?: e.message}"
             }
-            stdout.join(1000)
-            stderr.join(1000)
-            val message = output.toString().trim().ifEmpty { error.toString().trim() }
-            return (exit == 0) to message.ifBlank {
-                if (exit == 0) "命令已完成" else "命令退出码 $exit"
+            stdout.join(OUTPUT_DRAIN_TIMEOUT_MS)
+            stderr.join(OUTPUT_DRAIN_TIMEOUT_MS)
+            if (stdout.isAlive || stderr.isAlive) {
+                return false to "命令输出读取超时，无法确认执行结果"
+            }
+            val standardOutput = output.toString().trim()
+            val standardError = error.toString().trim()
+            val message = listOf(standardOutput, standardError).filter { it.isNotEmpty() }.joinToString("\n")
+            val confirmed = isCommandSuccessful(exit, standardOutput, command)
+            val success = confirmed && isCommandSuccessful(exit, standardError) &&
+                !truncated.get() && !readFailure.get()
+            return success to when {
+                readFailure.get() -> "命令输出读取失败，无法确认执行结果"
+                truncated.get() -> "命令输出被截断，无法确认执行结果：${message.take(256)}"
+                message.isBlank() && exit != 0 -> "命令退出码 $exit"
+                !confirmed && command.startsWith("pm ") -> "无法确认包管理命令结果，请检查应用状态：${message.ifBlank { "没有输出" }}"
+                message.isBlank() -> "命令已完成"
+                else -> message
             }
         } finally {
-            process.inputStream.close()
-            process.errorStream.close()
-            process.outputStream.close()
+            // A remote process can close these itself; cleanup must not mask its actual result.
+            try { process.inputStream.close() } catch (_: IOException) { }
+            try { process.errorStream.close() } catch (_: IOException) { }
+            try { process.outputStream.close() } catch (_: IOException) { }
+        }
+    }
+
+    internal fun isCommandSuccessful(exit: Int, message: String, command: String = ""): Boolean {
+        if (exit != 0) return false
+        val confirmed = when {
+            command.startsWith("pm uninstall ") -> message.trim() == "Success"
+            command.startsWith("pm disable-user --user 0 ") -> {
+                val pkg = command.substringAfterLast(' ')
+                message.trim() == "Package $pkg new state: disabled-user"
+            }
+            else -> true
+        }
+        return confirmed && message.lineSequence().none { line ->
+            val text = line.trimStart()
+            text.startsWith("Failure", ignoreCase = true) ||
+                text.startsWith("Error:", ignoreCase = true) ||
+                text.startsWith("Security exception:", ignoreCase = true)
         }
     }
 
@@ -232,5 +307,6 @@ object ShellExecutor {
     }
 
     private const val COMMAND_TIMEOUT_MS = 10_000L
+    private const val OUTPUT_DRAIN_TIMEOUT_MS = 3_000L
     private const val MAX_OUTPUT_CHARS = 4096
 }

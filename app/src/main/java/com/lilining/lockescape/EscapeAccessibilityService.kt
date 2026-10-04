@@ -21,7 +21,6 @@ import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 
@@ -52,7 +51,7 @@ class EscapeAccessibilityService : AccessibilityService() {
             KeyEvent.ACTION_DOWN -> {
                 val decision = volumeKeyTrigger.onVolumeDown(
                     event.keyCode,
-                    System.currentTimeMillis(),
+                    event.eventTime,
                     isRepeat = event.repeatCount > 0
                 )
                 if (decision.scheduleLongPress) {
@@ -93,22 +92,15 @@ class EscapeAccessibilityService : AccessibilityService() {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val pkg = event.packageName?.toString()
             if (!pkg.isNullOrBlank()) {
-                val inputMethodPackage = Settings.Secure.getString(
-                    contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD
-                )?.substringBefore('/')
                 // The rescue console temporarily covers the suspect app. Keep the target
                 // until it expires; other windows revoke it to prevent stale targeting.
                 if (pkg == packageName) return
-                if (pkg == inputMethodPackage || AppSafety.isProtectedPackage(pkg) ||
-                    AppSafety.isDefaultWhitelistedPackage(pkg)) {
+                val whitelist = Prefs.userWhitelist(this)
+                if (!ProtectedTargets.from(this).canActOn(pkg, whitelist)) {
                     Prefs.clearCurrentTopPackage(this)
                     return
                 }
-                if (AppSafety.shouldTrackTopPackage(pkg, Prefs.userWhitelist(this), inputMethodPackage)) {
-                    Prefs.saveCurrentTopPackage(this, pkg)
-                } else {
-                    Prefs.clearCurrentTopPackage(this)
-                }
+                Prefs.saveCurrentTopPackage(this, pkg)
             }
         }
     }

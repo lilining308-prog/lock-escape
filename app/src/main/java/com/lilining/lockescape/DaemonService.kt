@@ -22,6 +22,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.annotation.TargetApi
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -36,6 +37,9 @@ class DaemonService : Service() {
     companion object {
         private const val CHANNEL_ID = "escape_daemon"
         private const val NOTIFICATION_ID = 1001
+
+        internal fun supportsSpecialUseForegroundType(sdkInt: Int): Boolean =
+            sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
     }
 
     override fun onCreate() {
@@ -65,11 +69,16 @@ class DaemonService : Service() {
             .setContentIntent(contentIntent)
             .setOngoing(true)
             .build()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        if (supportsSpecialUseForegroundType(Build.VERSION.SDK_INT)) {
+            startSpecialUseForeground(notification)
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
+    }
+
+    @TargetApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun startSpecialUseForeground(notification: Notification) {
+        startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY

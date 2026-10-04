@@ -13,6 +13,8 @@
 
 ## 在线源码目录
 
+以下 `main` 链接仅指向线上已提交版本；若分发的 APK 由其他提交或未提交工作区构建，须另行提供与该 APK 对应的完整源码及构建脚本，不应仅以此链接代替。
+
 - 主源码：https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java
 - 测试源码：https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java
 
@@ -23,5 +25,8 @@
 - `assets/GPL/THIRD_PARTY_NOTICES.md`
 - `assets/GPL/README.md`
 - `assets/GPL/APK-README.md`
+- 历史二进制与源码溯源：仓库 `docs/APK源码对应表.md`（需按实际 APK 的 SHA-256 核对）
 
 分发 APK 时必须同时提供完整源码、GPL-3.0 许可证和第三方许可声明。
+
+构建版本校验：分发方必须在 APK 下载页标出该二进制文件的 SHA-256，以及生成它的源码提交或同一发布位置的源码压缩包；仅凭 `versionName` 或固定 `main` 链接无法确认对应源码。

@@ -110,4 +110,51 @@ class AppSafetyTest {
         assertFalse("bad package" in normalized)
         assertFalse("" in normalized)
     }
+
+    @Test
+    fun packageNameValidatorDoesNotSilentlyAcceptPaddedNames() {
+        assertFalse(AppSafety.isValidPackageName(" com.example.safe "))
+        assertFalse(AppSafety.isValidPackageName("com.example.safe\n"))
+        assertTrue(AppSafety.normalizeUserWhitelist(setOf(" com.example.safe ")).contains("com.example.safe"))
+    }
+
+    @Test
+    fun shellMetacharactersAndControlCharactersAreNeverPackageNames() {
+        for (pkg in listOf("com.example.app;id", "com.example.app\u0000", "com.example.app\nreboot", "com.example.app`id`")) {
+            assertFalse(AppSafety.isValidPackageName(pkg))
+            assertFalse(ShellExecutor.forceStopForTest(pkg).first)
+        }
+    }
+
+    @Test
+    fun unicodeLookalikesAndLeadingDigitsAreNotShellPackageNames() {
+        assertFalse(AppSafety.isValidPackageName("com.example.安全"))
+        assertFalse(AppSafety.isValidPackageName("1com.example.app"))
+        assertTrue(AppSafety.isValidPackageName("com.example.app_2"))
+    }
+
+    @Test
+    fun whitespaceSeparatedUserWhitelistIsNormalizedWithoutAllowingShellWhitespace() {
+        val normalized = AppSafety.normalizeUserWhitelist(setOf("\tcom.example.safe\t"))
+        assertTrue("com.example.safe" in normalized)
+        assertFalse(AppSafety.isValidPackageName("\tcom.example.safe\t"))
+    }
+
+    @Test
+    fun packageNameWithInternalSpacesIsNeverNormalizedIntoExecutableCommand() {
+        assertFalse(AppSafety.isValidPackageName("com.example. app"))
+        assertFalse(ShellExecutor.disableForTest("com.example. app").first)
+    }
+
+    @Test
+    fun caseSensitivePackageNamesAreNotLowercasedByValidation() {
+        assertTrue(AppSafety.isValidPackageName("com.Example.Locker"))
+        assertTrue(ShellExecutor.forceStopCommandForTest("com.Example.Locker") == "am force-stop com.Example.Locker")
+    }
+
+    @Test
+    fun packageNameWithoutDotCannotBeUsedForActions() {
+        assertFalse(AppSafety.isValidPackageName("singlepackage"))
+        assertFalse(ShellExecutor.forceStopForTest("singlepackage").first)
+    }
 }
