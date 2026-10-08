@@ -64,7 +64,7 @@ class DaemonService : Service() {
         )
         val notification: Notification = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("锁机逃生已就绪")
-            .setContentText("音量键连按 4 次触发逃生")
+            .setContentText("长按音量下 1.5s 或连按 4 次触发逃生")
             .setSmallIcon(android.R.drawable.ic_lock_lock)
             .setContentIntent(contentIntent)
             .setOngoing(true)

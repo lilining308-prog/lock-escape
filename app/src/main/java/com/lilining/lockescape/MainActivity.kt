@@ -17,6 +17,7 @@
 
 package com.lilining.lockescape
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -27,6 +28,8 @@ import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.lilining.lockescape.databinding.ActivityMainBinding
 import rikka.shizuku.Shizuku
 import rikka.shizuku.ShizukuProvider
@@ -60,6 +63,15 @@ class MainActivity : AppCompatActivity() {
         binding.btnRootEscape.setOnClickListener {
             startActivity(Intent(this, RootLauncherActivity::class.java))
         }
+        requestNotificationPermissionIfNeeded()
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) return
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
     }
 
     override fun onResume() {
@@ -85,6 +97,18 @@ class MainActivity : AppCompatActivity() {
         binding.tvCurrentTop.text = "最近目标应用：" + Prefs.currentTopPackage(this).ifBlank { "无（等待无障碍事件）" }
         val logs = Prefs.getEscapeLogs(this)
         binding.tvLogs.text = if (logs.isEmpty()) "暂无逃生记录" else logs.joinToString("\n")
+        binding.tvChannelStatus.text = channelStatusText()
+    }
+
+    private fun channelStatusText(): String {
+        val mode = Prefs.executionMode(this)
+        val shizukuReady = Shizuku.pingBinder() && (Shizuku.isPreV11() ||
+            Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED)
+        return buildString {
+            append("执行模式：")
+            append(if (mode == ShellExecutor.Mode.ROOT) "root 优先" else "自动（Shizuku 优先）")
+            append(if (shizukuReady) " · Shizuku 就绪" else " · 需要 Shizuku 或 root")
+        }
     }
 
     private fun batteryOptimizationText(): String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

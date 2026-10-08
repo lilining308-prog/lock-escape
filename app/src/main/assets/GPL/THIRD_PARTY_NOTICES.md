@@ -25,6 +25,7 @@
 
 - GPL-3.0 全文：见本项目根目录 [LICENSE](LICENSE)
 - Apache-2.0 / MIT 全文：见本项目根目录 [NOTICE](NOTICE)（含各上游项目的完整版权信息与许可文本）
+- release 运行时传递依赖逐项清单：见 [docs/DEPENDENCY_LICENSES.md](docs/DEPENDENCY_LICENSES.md)（`gradle generateDependencyLicenseReport` 可再生）
 
 ## 上游版权声明（按许可证要求保留）
 

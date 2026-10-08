@@ -130,6 +130,15 @@
                 android:text="当前顶层应用：未知"
                 android:textColor="@color/accent_green"
                 android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvChannelStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="执行模式：自动"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp" />
         </LinearLayout>
 
         <LinearLayout

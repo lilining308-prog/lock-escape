@@ -44,6 +44,7 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 
 - 本项目主许可证为 **GPL-3.0**（见 [LICENSE](LICENSE)）。
 - 上游参考项目的版权归属与完整许可文本见 [NOTICE](NOTICE)，项目清单与合规说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+- release 运行时传递依赖逐项清单见 [docs/DEPENDENCY_LICENSES.md](docs/DEPENDENCY_LICENSES.md)，可用 `gradle generateDependencyLicenseReport` 再生；APK 内 `assets/GPL/DEPENDENCY_LICENSES.md` 随包分发。
 - `hnpdsyn/PhoneGuard` 与 `me.lucky/wasted` 已列为“未采用 / 合规排除来源”：不得复制、改写或直接复用其源码；当前实现仅使用 Android SDK 公开 API、Shizuku 依赖和本项目原创 GPL-3.0 代码。
 - 仓库公开已提交源码：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。分发 APK 时须提供与该 APK 对应的源码版本、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`；仅提供 `main` 链接不足以证明源码对应关系。
 - 所有原创源码按 GPL-3.0 分发，源码文件保留 GPL 头部声明；资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目发布。
@@ -84,6 +85,8 @@ Android 紧急逃生工具：当设备被锁机病毒 / 无障碍恶意锁屏控
 - [x] 2.0 正式版：修复音量下长按触发、系统应用误拦截，新增 root 优先模式
 - [x] 用户自定义白名单 + 系统桌面默认屏蔽，避免桌面触发风控
 - [x] 成熟工具化管理：白名单可新增/移除/清空，逃生记录可清空，包名格式自动校验
+- [x] 传递依赖许可清单（`gradle generateDependencyLicenseReport` → `docs/DEPENDENCY_LICENSES.md`）
+- [x] 修复音量键触发时 SystemUI/输入法窗口误清空目标；su 多路径探测
 
 ## 触发方式
 

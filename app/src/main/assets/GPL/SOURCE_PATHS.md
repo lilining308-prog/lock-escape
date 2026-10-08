@@ -23,6 +23,7 @@
 - `assets/GPL/LICENSE-GPL-3.0.txt`
 - `assets/GPL/NOTICE.txt`
 - `assets/GPL/THIRD_PARTY_NOTICES.md`
+- `assets/GPL/DEPENDENCY_LICENSES.md`（release 运行时传递依赖清单）
 - `assets/GPL/README.md`
 - `assets/GPL/APK-README.md`
 - 历史二进制与源码溯源：仓库 `docs/APK源码对应表.md`（需按实际 APK 的 SHA-256 核对）

@@ -95,8 +95,20 @@ class EscapeAccessibilityService : AccessibilityService() {
                 // The rescue console temporarily covers the suspect app. Keep the target
                 // until it expires; other windows revoke it to prevent stale targeting.
                 if (pkg == packageName) return
+                val policy = ProtectedTargets.from(this)
                 val whitelist = Prefs.userWhitelist(this)
-                if (!ProtectedTargets.from(this).canActOn(pkg, whitelist)) {
+                // Returning to a launcher means the user left the suspect app — revoke.
+                if (AppSafety.isDefaultWhitelistedPackage(pkg)) {
+                    Prefs.clearCurrentTopPackage(this)
+                    return
+                }
+                // Keyboard / volume dialog / other system UI must not become a new target,
+                // but they must not wipe a still-valid rescue target either — otherwise
+                // the volume-key trigger itself erases the package the user just captured.
+                if (pkg == policy.inputMethodPackage || AppSafety.isProtectedPackage(pkg)) {
+                    return
+                }
+                if (!policy.canActOn(pkg, whitelist)) {
                     Prefs.clearCurrentTopPackage(this)
                     return
                 }

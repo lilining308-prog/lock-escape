@@ -17,12 +17,12 @@ class RescueTargetTest {
         assertEquals("com.example.locker", target.current())
     }
 
-    @Test fun switchingToKeyboardOrSystemWindowRevokesOldTarget() {
+    @Test fun switchingToKeyboardOrSystemWindowKeepsLastExternalTarget() {
         val target = RescueTarget()
         target.onWindow("com.example.locker", "com.lilining.lockescape", emptySet())
         target.onWindow("com.google.android.inputmethod.latin", "com.lilining.lockescape", emptySet(), "com.google.android.inputmethod.latin")
         target.onWindow("com.android.systemui", "com.lilining.lockescape", emptySet())
-        assertEquals("", target.current())
+        assertEquals("com.example.locker", target.current())
     }
 
     @Test fun switchingToAnotherAppReplacesTargetAndWhitelistRevokesIt() {
@@ -62,7 +62,8 @@ class RescueTargetTest {
         target.onWindow("org.example.keyboard", "com.lilining.lockescape", emptySet(),
             inputMethodPackage = "org.example.keyboard", nowMs = 200L)
 
-        assertEquals("", target.current(nowMs = 201L))
+        // Keyboard windows must not steal or wipe the rescue target.
+        assertEquals("com.example.locker", target.current(nowMs = 201L))
         assertFalse(target.isActionable("org.example.keyboard", "com.lilining.lockescape", emptySet(),
             inputMethodPackage = "org.example.keyboard"))
     }

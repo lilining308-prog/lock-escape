@@ -169,27 +169,38 @@ object ShellExecutor {
     }
 
     private fun runViaSu(cmd: String): Pair<Boolean, String> {
-        return try {
-            runSuCommand(cmd) { args ->
-                val process = Runtime.getRuntime().exec(args)
-                waitForProcess(process, command = cmd)
+        val suCandidates = listOf("su", "/system/xbin/su", "/system/bin/su", "/sbin/su", "/vendor/bin/su")
+        val failures = mutableListOf<String>()
+        for (suPath in suCandidates) {
+            try {
+                return runSuCommand(suPath, cmd) { args ->
+                    val process = Runtime.getRuntime().exec(args)
+                    waitForProcess(process, command = cmd)
+                }
+            } catch (e: IOException) {
+                failures += "$suPath: ${e.message ?: e.javaClass.simpleName}"
             }
-        } catch (e: IOException) {
-            Pair(false, "root 不可用（su 不可用）")
         }
+        return false to "root 不可用（su 不可用）${failures.joinToString("；") { "[$it]" }}"
+    }
+
+    private fun runSuCommand(
+        suPath: String,
+        cmd: String,
+        exec: (Array<String>) -> Pair<Boolean, String>
+    ): Pair<Boolean, String> {
+        val primary = exec(arrayOf(suPath, "-c", cmd))
+        if (primary.first || !primary.second.trim().matches(
+                Regex("(?i)^su: invalid uid/gid ['\"]?-c['\"]?$"))) {
+            return primary
+        }
+        return exec(arrayOf(suPath, "0", "sh", "-c", cmd))
     }
 
     private fun runSuCommand(
         cmd: String,
         exec: (Array<String>) -> Pair<Boolean, String>
-    ): Pair<Boolean, String> {
-        val primary = exec(arrayOf("su", "-c", cmd))
-        if (primary.first || !primary.second.trim().matches(
-                Regex("(?i)^su: invalid uid/gid ['\"]?-c['\"]?$"))) {
-            return primary
-        }
-        return exec(arrayOf("su", "0", "sh", "-c", cmd))
-    }
+    ): Pair<Boolean, String> = runSuCommand("su", cmd, exec)
 
     internal fun waitForProcess(
         process: Process,
@@ -297,14 +308,19 @@ object ShellExecutor {
     fun isAnyChannelAvailable(): Boolean {
         if (Shizuku.pingBinder() && (Shizuku.isPreV11() ||
                 Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED)) return true
-        return try {
-            val p = Runtime.getRuntime().exec("su")
-            DataOutputStream(p.outputStream).use { it.writeBytes("exit\n"); it.flush() }
-            waitForProcess(p).first
-        } catch (e: Exception) {
-            false
+        for (suPath in SU_CANDIDATES) {
+            try {
+                val p = Runtime.getRuntime().exec(suPath)
+                DataOutputStream(p.outputStream).use { it.writeBytes("exit\n"); it.flush() }
+                if (waitForProcess(p).first) return true
+            } catch (_: Exception) {
+                // try next su path
+            }
         }
+        return false
     }
+
+    private val SU_CANDIDATES = listOf("su", "/system/xbin/su", "/system/bin/su", "/sbin/su", "/vendor/bin/su")
 
     private const val COMMAND_TIMEOUT_MS = 10_000L
     private const val OUTPUT_DRAIN_TIMEOUT_MS = 3_000L
