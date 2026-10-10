@@ -1,60 +1,72 @@
-# APK 下载说明
+# APK 分类下载
 
-**本应用是半成品**，可以基于仓库源码修改后再构建，不建议把下列历史二进制当作完成品使用。
+**本应用是半成品**，欢迎基于源码修改扩展（GPL-3.0）。下列安装包按用途分类，便于查找。
 
-**许可核查状态：暂停推荐下载。** 以下文件均是已提交的历史二进制；尚未核实每个 APK 与其完整对应源码、第三方依赖许可材料的对应关系。目录和文件名中的“推荐”“正式版”“当前”均不代表当前通过许可核查。取得对应源码和完整材料并验证后，才能重新标为推荐。
+## 目录结构
 
-## 历史“推荐下载”目录（当前暂停推荐）
+| 目录 | 用途 | 适合谁 |
+|------|------|--------|
+| [`stable/`](stable/) | 2.0 正式构建（推荐下载） | 普通用户试用 |
+| [`debug/`](debug/) | 调试构建 | 开发者 / 测试 |
+| [`archive/`](archive/) | 历史版本 | 仅归档，不推荐安装 |
+| [`_legacy-original-layout/`](_legacy-original-layout/) | 旧文件名与重复别名 | 保留原路径兼容，不建议新下载 |
 
-| 文件 | 版本 | 用途 | 建议 |
-|------|------|------|------|
-| `推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk` | 2.0 历史构建 | 历史留档 | 暂停推荐，待许可核查 |
-| `推荐下载-2.0正式版/锁机逃生-2.0-SU直接启动-GPL版.apk` | 2.0 历史构建 | 与上一行 SHA-256 相同，历史别名 | 暂停推荐，待许可核查 |
+## 推荐下载（stable）
 
-## 开发测试
-
-| 文件 | 版本 | 用途 | 建议 |
-|------|------|------|------|
-| `调试版-开发测试/锁机逃生-2.0调试版-开发测试.apk` | 2.0 调试版 | ADB 调试、开发测试 | 普通用户不要下 |
-| `调试版-开发测试/app-debug-当前调试版.apk` | 历史调试版 | 不包含本地未提交的优化，仅用于开发测试 | 不作为当前构建分发 |
-
-## 历史版本
-
-| 文件 | 版本 | 用途 | 建议 |
-|------|------|------|------|
-| `历史版本-不推荐/锁机逃生-0.1.0历史调试版-不推荐.apk` | 0.1.0 调试版 | 历史归档 | 不推荐安装 |
-
-## 根目录 APK 说明
-
-根目录仍保留原文件名，避免旧链接失效：
-
-- `lock-escape-v2.0-official.apk`：2.0 历史构建，暂停推荐。
-- `lock-escape-v2.0-su-direct-gpl.apk`：历史正式包的相同字节别名，暂停推荐。
-- `lock-escape-v2.0-release.apk`：与历史 2.0 正式包 SHA-256 相同，不表示新版发布。
-- `lock-escape-v2.0-debug.apk`：2.0 调试版，仅开发测试。
-- `app-debug.apk`：历史调试版，保留原路径；不等同于当前工作区构建，也不等同于 2.0 历史正式包。
-- `lock-escape-v0.1.0-debug.apk`：历史调试版，不推荐。
-
-## 源码公开与许可
-
-以下 `main` 链接指向线上已提交源码。仓库内 `apk/` 的文件是已构建产物，不能据此认定其内容与本地未提交的开发改动一致；分发每个 APK 时应同时提供该版本对应的完整源码和构建脚本。
-
-已提交 APK 的 SHA-256、同内容别名及最早包含其当前字节的提交见 [APK源码对应表](../docs/APK源码对应表.md)。旧版 APK 内置的 `NOTICE` 可能保留过时表述，应另行随包提供本仓库根目录的更正版本 `NOTICE`；历史 `0.1.0` APK 无内置 GPL 材料，分发时必须包外补齐。
-
-- 仓库中已提交的源码可从 [主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java) 和 [测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java) 查阅；这些不断变化的 `main` 链接不等于历史 APK 的对应源码版本。
-- 当前开发版本地源码路径：`app/src/main/java/com/lilining/lockescape/`。
-- 当前开发版本地测试源码路径：`app/src/test/java/com/lilining/lockescape/`。
-- 主许可证为 GPL-3.0，全文见仓库根目录 `LICENSE`。
-- 第三方声明见仓库根目录 `THIRD_PARTY_NOTICES.md` 与 `NOTICE`。
-- 分发 APK 时应同时提供源码仓库地址、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`。
-- 所有原创源码、资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目公开。
-- 2.0 历史 APK 中能找到 `assets/GPL/`，但内置 NOTICE 是旧版；0.1.0 历史包没有该目录。具体清单与缺口见 [APK源码对应表](../docs/APK源码对应表.md)。
-
-## APK 声明核查
-
-已核查 `锁机逃生-2.0正式版-推荐下载.apk`：
+| 文件 | 版本 | 说明 |
+|------|------|------|
+| [`stable/lock-escape-2.0-release.apk`](stable/lock-escape-2.0-release.apk) | 2.0 | 正式构建，含 `assets/GPL/` 许可材料 |
 
 - 包名：`com.lilining.lockescape`
 - 版本：`versionName=2.0`，`versionCode=20`
-- 权限声明包含：前台服务、通知、唤醒锁、悬浮窗、忽略电池优化、查询应用列表、Shizuku API 权限。
-- 这些权限与锁机逃生功能直接相关：监听触发、前台保活、覆盖逃生界面、定位顶层包、执行 Shizuku/root 逃生动作。
+- SHA-256：`3AB9F8BD63A6A936CE513C13F6C648CE866F061659F94F5DDB9E5F045EE86A45`
+
+> 历史包内置 NOTICE 可能含旧表述；分发时请随附仓库根目录更正后的 `NOTICE`、`LICENSE`、`THIRD_PARTY_NOTICES.md` 与对应源码。
+
+## 开发调试（debug）
+
+| 文件 | 版本 | 说明 |
+|------|------|------|
+| [`debug/lock-escape-2.0-debug.apk`](debug/lock-escape-2.0-debug.apk) | 2.0 debug | 开发测试用 |
+| [`debug/app-debug-historical.apk`](debug/app-debug-historical.apk) | 历史 debug | 旧调试包，非当前工作区构建 |
+
+普通用户请勿安装 debug 包。
+
+## 历史归档（archive）
+
+| 文件 | 版本 | 说明 |
+|------|------|------|
+| [`archive/lock-escape-0.1.0-debug.apk`](archive/lock-escape-0.1.0-debug.apk) | 0.1.0 debug | 历史归档，缺内置 GPL 材料，不推荐安装 |
+
+## 旧布局（`_legacy-original-layout/`）
+
+保留原先根目录散落文件与中文分类文件夹，避免旧链接失效。其中多个文件与上表 **SHA-256 完全相同**（纯别名）：
+
+| 旧文件 | 与之相同的分类版 |
+|--------|------------------|
+| `lock-escape-v2.0-official.apk` / `lock-escape-v2.0-release.apk` / `lock-escape-v2.0-su-direct-gpl.apk` | `stable/lock-escape-2.0-release.apk` |
+| `lock-escape-v2.0-debug.apk` | `debug/lock-escape-2.0-debug.apk` |
+| `app-debug.apk` | `debug/app-debug-historical.apk` |
+| `lock-escape-v0.1.0-debug.apk` | `archive/lock-escape-0.1.0-debug.apk` |
+
+完整 SHA-256 与源码溯源见 [docs/APK源码对应表.md](../docs/APK源码对应表.md)。
+
+## 完整源码包（推荐与 APK 一起取）
+
+本地交付目录还有当前构建配对包：
+
+- [`../deliverables/lock-escape-current-release.apk`](../deliverables/lock-escape-current-release.apk)
+- [`../deliverables/lock-escape-current-source.zip`](../deliverables/lock-escape-current-source.zip)
+
+配对 SHA-256 见 [`../deliverables/交付说明.md`](../deliverables/交付说明.md)。
+
+## 分发时请一并提供
+
+1. 与该 APK 对应的完整源码（或固定 Git 提交）
+2. `LICENSE`（GPL-3.0）
+3. `NOTICE`、`THIRD_PARTY_NOTICES.md`
+4. `docs/DEPENDENCY_LICENSES.md`
+
+## 本地分类副本
+
+`../deliverables/apk/` 下另有 `stable` / `debug` / `archive` 三类副本，与本目录分类一致，方便打包外发。

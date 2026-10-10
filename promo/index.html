@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0B0F14" />
+<title>lock-escape 锁机逃生 · 开源应急工具</title>
+<style>
+  :root {
+    --bg: #0B0F14;
+    --surface: #121820;
+    --surface2: #1A222C;
+    --ink: #E8EEF5;
+    --muted: #8B9AAB;
+    --accent: #FF4757;
+    --accent2: #FF6B35;
+    --ok: #2ED573;
+    --line: rgba(232, 238, 245, 0.08);
+    --radius: 14px;
+    --safe: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { min-height: 100dvh; }
+  .app {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    background: var(--bg);
+    position: relative;
+    padding-bottom: calc(72px + var(--safe));
+  }
+
+  /* Top bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(11, 15, 20, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+  }
+  .logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: linear-gradient(145deg, var(--accent), var(--accent2));
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .badge-half {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent2);
+    background: rgba(255, 107, 53, 0.12);
+    border: 1px solid rgba(255, 107, 53, 0.35);
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 22px 18px 8px;
+  }
+  .hero h1 {
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    margin-bottom: 10px;
+  }
+  .hero h1 .hl {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero .sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .tag {
+    font-size: 11px;
+    color: var(--ink);
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 999px;
+  }
+  .tag.accent {
+    color: var(--accent);
+    border-color: rgba(255, 71, 87, 0.35);
+    background: rgba(255, 71, 87, 0.1);
+  }
+
+  /* Trigger visual */
+  .trigger-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 18px;
+  }
+  .trigger-card h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .keys {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .key {
+    width: 42px;
+    height: 52px;
+    border-radius: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    position: relative;
+  }
+  .key.pulse {
+    animation: keyPulse 1.6s ease-in-out infinite;
+    border-color: rgba(255, 71, 87, 0.55);
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.35);
+  }
+  .key.pulse:nth-child(2) { animation-delay: 0.15s; }
+  .key.pulse:nth-child(3) { animation-delay: 0.3s; }
+  .key.pulse:nth-child(4) { animation-delay: 0.45s; }
+  @keyframes keyPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.35); }
+    50% { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(255, 71, 87, 0); }
+  }
+  .arrow {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .trigger-note {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .trigger-note strong { color: var(--ok); font-weight: 600; }
+
+  /* Flow */
+  .flow {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .flow-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .step-n {
+    flex: 0 0 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 71, 87, 0.15);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+  }
+  .step-t { font-size: 13px; color: var(--ink); }
+  .step-t span { color: var(--muted); display: block; font-size: 11px; margin-top: 2px; }
+
+  /* Section */
+  .section {
+    padding: 0 18px 8px;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 8px 0 12px;
+  }
+  .section-head h2 {
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: -0.2px;
+  }
+  .section-head a {
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  /* APK cards */
+  .apk-list { display: grid; gap: 12px; }
+  .apk-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .apk-card.recommended {
+    border-color: rgba(46, 213, 115, 0.35);
+    background: linear-gradient(180deg, rgba(46, 213, 115, 0.08), var(--surface) 42%);
+  }
+  .apk-card .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .apk-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .pill {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    padding: 4px 8px;
+    border-radius: 999px;
+  }
+  .pill.ok { background: rgba(46, 213, 115, 0.15); color: var(--ok); }
+  .pill.warn { background: rgba(255, 107, 53, 0.15); color: var(--accent2); }
+  .pill.mute { background: rgba(139, 154, 171, 0.15); color: var(--muted); }
+  .apk-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .apk-meta code {
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 11px;
+    color: var(--ink);
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 650;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    color: var(--ink);
+    background: var(--surface2);
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+  }
+  .btn.ghost {
+    background: transparent;
+    border-color: var(--line);
+    color: var(--muted);
+  }
+  .btn:active { transform: scale(0.97); }
+
+  /* Notice */
+  .notice {
+    margin: 18px 18px 8px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(255, 107, 53, 0.08);
+    border: 1px solid rgba(255, 107, 53, 0.25);
+    font-size: 12px;
+    color: var(--accent2);
+    line-height: 1.55;
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 8px 18px 18px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .stat .n {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+  .stat .l {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+  }
+
+  /* Gallery */
+  .gallery {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 0 18px 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .gallery::-webkit-scrollbar { display: none; }
+  .shot {
+    flex: 0 0 168px;
+    scroll-snap-align: start;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface2);
+  }
+  .shot img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+    background: #1a222c;
+  }
+  .shot .cap {
+    font-size: 11px;
+    color: var(--muted);
+    padding: 8px 10px;
+    background: var(--surface);
+  }
+
+  /* Comm */
+  .comm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 18px 20px;
+  }
+  .comm a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .comm a .ico {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--surface2);
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+  }
+
+  /* Footer */
+  .foot {
+    padding: 8px 18px 28px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  /* Bottom nav */
+  .tabbar {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: min(430px, 100%);
+    height: calc(60px + var(--safe));
+    padding-bottom: var(--safe);
+    background: rgba(18, 24, 32, 0.96);
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    z-index: 30;
+    backdrop-filter: blur(12px);
+  }
+  .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 10px;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .tab.active { color: var(--accent); }
+  .tab .ic { font-size: 16px; line-height: 1; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 88px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 50;
+    white-space: nowrap;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">LE</div>
+      <div>lock-escape</div>
+    </div>
+    <div class="badge-half">半成品 · GPL-3.0</div>
+  </header>
+
+  <section class="hero" id="home">
+    <h1>被锁机困住？<br /><span class="hl">按键即逃生</span></h1>
+    <p class="sub">
+      Android 应急逃生工具：物理按键触发全屏拦截，经 Shizuku / root 一键删除锁机组件。开源半成品，欢迎改。
+    </p>
+    <div class="tag-row">
+      <span class="tag accent">Open Source</span>
+      <span class="tag">#Android</span>
+      <span class="tag">#FOSS</span>
+      <span class="tag">Shizuku</span>
+      <span class="tag">Accessibility</span>
+    </div>
+
+    <div class="trigger-card">
+      <h2>触发方式</h2>
+      <div class="keys">
+        <div class="key pulse">+</div>
+        <div class="key pulse">+</div>
+        <div class="key pulse">+</div>
+        <div class="key pulse">+</div>
+        <div class="arrow">→</div>
+        <div class="key" style="width:64px;border-color:rgba(255,71,87,.45);color:var(--accent)">逃生</div>
+      </div>
+      <p class="trigger-note">
+        1.5 秒内连按音量键 4 次 · 或长按音量下 1.5 秒 · 弹出确认界面后才执行，<strong>不会静默卸载</strong>
+      </p>
+    </div>
+  </section>
+
+  <section class="flow" aria-label="逃生流程">
+    <div class="flow-step">
+      <div class="step-n">1</div>
+      <div class="step-t">无障碍常驻监听按键<span>开启服务后捕获顶层锁机包名</span></div>
+    </div>
+    <div class="flow-step">
+      <div class="step-n">2</div>
+      <div class="step-t">全屏 Overlay 强制拦截<span>覆盖锁屏界面，夺回操作权</span></div>
+    </div>
+    <div class="flow-step">
+      <div class="step-n">3</div>
+      <div class="step-t">Shizuku / Root 清除组件<span>force-stop → disable / uninstall，系统应用受保护</span></div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="n">2.0</div><div class="l">当前版本</div></div>
+    <div class="stat"><div class="n">GPL</div><div class="l">开源许可</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">分类安装包</div></div>
+  </div>
+
+  <section class="section" id="download">
+    <div class="section-head">
+      <h2>分类下载</h2>
+      <a href="https://github.com/lilining308-prog/lock-escape/tree/main/apk" target="_blank" rel="noopener">仓库目录 →</a>
+    </div>
+    <div class="apk-list">
+
+      <article class="apk-card recommended">
+        <div class="row">
+          <h3>lock-escape-2.0-release.apk</h3>
+          <span class="pill ok">推荐</span>
+        </div>
+        <p class="apk-meta">
+          分类 <code>stable</code> · 正式构建 · 含 GPL 材料<br />
+          SHA-256 <code>3AB9F8BD…6A45</code>
+        </p>
+        <div class="btn-row">
+          <a class="btn primary" href="https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-v2.0-release.apk" target="_blank" rel="noopener">下载 APK</a>
+          <button class="btn ghost" data-copy="https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-v2.0-release.apk">复制链接</button>
+        </div>
+      </article>
+
+      <article class="apk-card">
+        <div class="row">
+          <h3>lock-escape-current-source.zip</h3>
+          <span class="pill ok">配套源码</span>
+        </div>
+        <p class="apk-meta">
+          分类 <code>stable</code> · 当前交付源码包 · GPL-3.0 全套材料<br />
+          与 current-release 成对提供
+        </p>
+        <div class="btn-row">
+          <a class="btn primary" href="https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-current-source.zip" target="_blank" rel="noopener">下载源码</a>
+          <button class="btn ghost" data-copy="https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-current-source.zip">复制链接</button>
+        </div>
+      </article>
+
+      <article class="apk-card">
+        <div class="row">
+          <h3>lock-escape-2.0-debug.apk</h3>
+          <span class="pill warn">开发调试</span>
+        </div>
+        <p class="apk-meta">
+          分类 <code>debug</code> · 仅供开发测试 · 普通用户勿装<br />
+          SHA-256 <code>551E5050…0F38</code>
+        </p>
+        <div class="btn-row">
+          <a class="btn" href="https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-2.0-debug.apk" target="_blank" rel="noopener">下载 debug</a>
+          <button class="btn ghost" data-copy="https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-2.0-debug.apk">复制链接</button>
+        </div>
+      </article>
+
+      <article class="apk-card">
+        <div class="row">
+          <h3>app-debug-historical.apk</h3>
+          <span class="pill warn">历史 debug</span>
+        </div>
+        <p class="apk-meta">
+          分类 <code>debug</code> · 旧调试包，非当前工作区构建
+        </p>
+        <div class="btn-row">
+          <a class="btn" href="https://github.com/lilining308-prog/lock-escape/tree/main/apk/debug" target="_blank" rel="noopener">查看目录</a>
+        </div>
+      </article>
+
+      <article class="apk-card">
+        <div class="row">
+          <h3>lock-escape-0.1.0-debug.apk</h3>
+          <span class="pill mute">历史归档</span>
+        </div>
+        <p class="apk-meta">
+          分类 <code>archive</code> · 不推荐安装 · 缺内置 GPL 材料
+        </p>
+        <div class="btn-row">
+          <a class="btn ghost" href="https://github.com/lilining308-prog/lock-escape/tree/main/apk/archive" target="_blank" rel="noopener">查看目录</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <div class="notice">
+    <strong>半成品声明：</strong>功能骨架可用，签名/机型适配/历史包合规仍有缺口。欢迎基于本作品修改扩展（GPL-3.0）。分发时请附对应源码、LICENSE、NOTICE。
+  </div>
+
+  <section class="section" id="shots">
+    <div class="section-head">
+      <h2>界面预览</h2>
+      <a href="https://github.com/lilining308-prog/lock-escape" target="_blank" rel="noopener">源码 →</a>
+    </div>
+  </section>
+  <div class="gallery" id="gallery">
+    <div class="shot"><img src="shots/square_lockescape_main_final.png" alt="主界面" loading="lazy" /><div class="cap">主界面 · 逃生控制台</div></div>
+    <div class="shot"><img src="shots/square_lockescape_accessibility_service.png" alt="无障碍服务" loading="lazy" /><div class="cap">无障碍服务</div></div>
+    <div class="shot"><img src="shots/square_lockescape_accessibility_settings.png" alt="无障碍设置" loading="lazy" /><div class="cap">无障碍设置</div></div>
+    <div class="shot"><img src="shots/square_lockescape_main_scrolled.png" alt="功能列表" loading="lazy" /><div class="cap">功能与日志</div></div>
+    <div class="shot"><img src="shots/square_lockescape_main_interface.png" alt="主界面备选" loading="lazy" /><div class="cap">主界面备选</div></div>
+  </div>
+
+  <section class="section" id="links" style="padding-top:8px">
+    <div class="section-head">
+      <h2>链接与社区</h2>
+    </div>
+  </section>
+  <div class="comm">
+    <a href="https://github.com/lilining308-prog/lock-escape" target="_blank" rel="noopener">
+      <div class="ico">⌥</div> GitHub 仓库
+    </a>
+    <a href="https://github.com/lilining308-prog/lock-escape/releases" target="_blank" rel="noopener">
+      <div class="ico">↓</div> Releases
+    </a>
+    <a href="https://github.com/lilining308-prog/lock-escape/blob/main/LICENSE" target="_blank" rel="noopener">
+      <div class="ico">§</div> GPL-3.0
+    </a>
+    <a href="https://github.com/lilining308-prog/lock-escape/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener">
+      <div class="ico">©</div> 第三方声明
+    </a>
+    <a href="https://github.com/lilining308-prog/lock-escape/tree/main/apk" target="_blank" rel="noopener">
+      <div class="ico">▦</div> APK 分类
+    </a>
+    <a href="https://www.youtube.com/post/Ugkxf_uEtfKGIoTJdLEu2ZwitrCQiY9PkkRj" target="_blank" rel="noopener">
+      <div class="ico">▶</div> YouTube
+    </a>
+  </div>
+
+  <footer class="foot">
+    lock-escape 锁机逃生 · 半成品开源项目 · GPL-3.0<br />
+    仓库地址 github.com/lilining308-prog/lock-escape<br />
+    欢迎 Star / Fork / PR，基于本作品继续完善
+  </footer>
+
+  <nav class="tabbar" id="tabbar">
+    <a class="tab active" href="#home"><span class="ic">◉</span>首页</a>
+    <a class="tab" href="#download"><span class="ic">↓</span>下载</a>
+    <a class="tab" href="#shots"><span class="ic">▣</span>截图</a>
+    <a class="tab" href="#links"><span class="ic">↗</span>链接</a>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var toast = document.getElementById("toast");
+  var tTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(tTimer);
+    tTimer = setTimeout(function () { toast.classList.remove("show"); }, 1800);
+  }
+
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.getAttribute("data-copy");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          showToast("链接已复制");
+        }).catch(function () {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    });
+  });
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      showToast("链接已复制");
+    } catch (e) {
+      showToast("复制失败，请长按选择");
+    }
+    document.body.removeChild(ta);
+  }
+
+  // tab active state
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+  var ids = ["home", "download", "shots", "links"];
+  function updateTab() {
+    var y = window.scrollY + 120;
+    var current = "home";
+    ids.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.offsetTop <= y) current = id;
+    });
+    tabs.forEach(function (t) {
+      var href = t.getAttribute("href") || "";
+      t.classList.toggle("active", href === "#" + current);
+    });
+  }
+  window.addEventListener("scroll", updateTab, { passive: true });
+  updateTab();
+
+  // smooth anchor
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function (e) {
+      var href = t.getAttribute("href");
+      if (href && href.charAt(0) === "#") {
+        e.preventDefault();
+        var el = document.querySelector(href);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  });
+
+  showToast("lock-escape · 分类下载已就绪");
+})();
+</script>
+</body>
+</html>

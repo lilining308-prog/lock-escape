@@ -52,14 +52,22 @@ AIGC:
 - 所有原创源码按 GPL-3.0 分发，源码文件保留 GPL 头部声明；资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目发布。
 - 当前构建的 APK 在 `assets/GPL/` 中打包许可与源码获取说明；历史 `0.1.0` 包没有该目录，各历史包的材料状态见 [APK源码对应表](docs/APK源码对应表.md)。
 
-## APK 下载
+## APK 下载（按用途分类）
 
-`apk/` 内保存的安装包为历史构建。对应源码和第三方依赖许可尚未逐包核实，当前不推荐作为已完成许可核查的发布版本下载或再分发。原“推荐下载”目录名仅为历史文件名，不代表当前核查结论。
+| 分类 | 目录 | 说明 |
+|------|------|------|
+| **stable（推荐）** | [`apk/stable/`](apk/stable/) | 2.0 正式构建，含 `assets/GPL/` |
+| debug | [`apk/debug/`](apk/debug/) | 开发测试用，普通用户勿装 |
+| archive | [`apk/archive/`](apk/archive/) | 历史版本，仅归档 |
+| 旧布局兼容 | [`apk/_legacy-original-layout/`](apk/_legacy-original-layout/) | 原文件名别名，避免旧链失效 |
 
-历史 `0.1.0` 包缺少内置许可材料，已发布的 `2.0` 包仍包含过时 NOTICE；详细差异与待核项见 [APK源码对应表](docs/APK源码对应表.md)。
+**直接下载（GitHub Release）：**
 
-更多 APK 分类、历史版本和调试版说明见 [apk/README.md](apk/README.md)。
-每个已跟踪 APK 的 SHA-256 与源码溯源线索见 [docs/APK源码对应表.md](docs/APK源码对应表.md)；不同 APK 不得仅凭相同版本号视为同一构建。
+- 推荐 APK：[lock-escape-v2.0-release.apk](https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-v2.0-release.apk)
+- 当前交付构建：[lock-escape-current-release.apk](https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-current-release.apk)
+- 配套源码包：[lock-escape-current-source.zip](https://github.com/lilining308-prog/lock-escape/releases/download/v2.0/lock-escape-current-source.zip)
+
+分类说明、SHA-256 与分发义务见 [apk/README.md](apk/README.md)；溯源线索见 [docs/APK源码对应表.md](docs/APK源码对应表.md)。历史 `0.1.0` 包缺少内置许可材料，分发时须包外补齐。手机端推广页见 [promo/index.html](promo/index.html)。
 
 ## 当前开发版源码
 
