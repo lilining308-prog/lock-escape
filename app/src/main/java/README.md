@@ -2,6 +2,8 @@
 
 这里是 lock-escape 当前开发版的主源码入口。
 
+**本应用是半成品**，以上代码即修改起点：欢迎基于本作品进行更改与完善，主许可证为 GPL-3.0，改动时请保留 GPL 头部并遵守根目录 `LICENSE` / `THIRD_PARTY_NOTICES.md`。
+
 ## 主源码路径
 
 - 应用源码：`app/src/main/java/com/lilining/lockescape/`
