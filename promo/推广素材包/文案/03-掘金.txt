@@ -1,0 +1,18 @@
+【标题】lock-escape 锁机逃生：开源 Android 应急逃生工具（半成品）
+
+【正文】
+
+如果手机被锁机病毒 / 无障碍恶意应用锁死，物理按键往往还在。lock-escape 就是吃这一点：
+
+1. 无障碍服务监听音量键组合（连按 4 次 / 长按音量下 1.5s）
+2. 全屏 Overlay 强制拦在锁机界面之上
+3. 用 Shizuku 或 root 执行 am force-stop → pm disable-user / uninstall
+
+技术上是 Kotlin + AccessibilityService + TYPE_APPLICATION_OVERLAY + Shizuku。做了白名单、系统关键包保护、逃生日志，避免误伤桌面和输入法。
+
+许可 GPL-3.0，LICENSE / NOTICE / 第三方声明 / 传递依赖清单都齐。明确半成品，欢迎基于源码改。
+
+仓库：https://github.com/lilining308-prog/lock-escape
+Release（APK 按 stable/debug/archive 分类）：https://github.com/lilining308-prog/lock-escape/releases/tag/v2.0
+
+配图建议：封面 cover-og + 主界面 + 无障碍服务截图

@@ -1,0 +1,20 @@
+[Title]
+lock-escape — open-source Android emergency escape tool (WIP, GPL-3.0)
+
+[Body]
+If a malware / lockscreen app hijacks accessibility and traps you, physical keys still work. lock-escape uses that:
+
+1. Accessibility service listens for a volume-key combo (4 taps / long-press vol-down)
+2. Full-screen overlay intercepts the lock UI
+3. Shizuku or root runs am force-stop → pm disable-user / uninstall
+
+Stack: Kotlin, AccessibilityService, TYPE_APPLICATION_OVERLAY, Shizuku.
+Includes whitelist, system-package protection, escape logs.
+
+Explicitly a half-finished project — PRs welcome.
+APKs are categorized: stable / debug / archive.
+
+Repo: https://github.com/lilining308-prog/lock-escape
+Release: https://github.com/lilining308-prog/lock-escape/releases/tag/v2.0
+
+Suggested images: cover-wide + main UI screenshot
