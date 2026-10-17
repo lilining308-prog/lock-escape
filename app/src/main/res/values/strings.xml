@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">锁机逃生</string>
-    <string name="root_launcher_label">锁机逃生 SU直启</string>
-    <string name="accessibility_service_label">锁机逃生（按键监听）</string>
-    <string name="accessibility_service_description">监听音量键连击触发逃生，并读取当前顶层应用包名。</string>
+    <string name="app_name">铁盾</string>
+    <string name="root_launcher_label">铁盾 Root 直启</string>
+    <string name="accessibility_service_label">铁盾（前台守护）</string>
+    <string name="accessibility_service_description">监测前台应用切换与音量键组合，用于设备防护与应急处理。</string>
 </resources>

@@ -12,6 +12,6 @@
 
 推荐与 APK 成对的当前交付物：
 
-- [`../lock-escape-current-release.apk`](../lock-escape-current-release.apk)
-- [`../lock-escape-current-source.zip`](../lock-escape-current-source.zip)
+- [`../tiedun-current-release.apk`](../tiedun-current-release.apk)
+- [`../tiedun-current-source.zip`](../tiedun-current-source.zip)
 - [`../交付说明.md`](../交付说明.md)

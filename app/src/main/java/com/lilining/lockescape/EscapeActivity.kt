@@ -21,6 +21,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.KeyguardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
@@ -73,10 +74,18 @@ class EscapeActivity : Activity() {
             runAction("强停", "am force-stop 后该应用会立即退出，锁机病毒一般会重新拉起") { pkg, mode -> ShellExecutor.forceStop(this, pkg, mode) }
         }
         binding.btnDisable.setOnClickListener {
-            runAction("停用", "停用后应用将无法启动，用于永久压制锁机病毒") { pkg, mode -> ShellExecutor.disable(this, pkg, mode) }
+            runAction("停用", "停用后应用将无法启动，用于永久压制锁机病毒") { pkg, mode ->
+                // 先终止目标进程，再停用，避免进程仍在前台时命令被顶住
+                ShellExecutor.forceStop(this, pkg, mode)
+                ShellExecutor.disable(this, pkg, mode)
+            }
         }
         binding.btnUninstall.setOnClickListener {
-            runAction("卸载", "卸载后应用将被移除（用户 0 范围）") { pkg, mode -> ShellExecutor.uninstall(this, pkg, mode) }
+            runAction("卸载", "卸载后应用将被移除（用户 0 范围）") { pkg, mode ->
+                // 先终止目标进程，再卸载
+                ShellExecutor.forceStop(this, pkg, mode)
+                ShellExecutor.uninstall(this, pkg, mode)
+            }
         }
         binding.btnExit.setOnClickListener { finish() }
         binding.btnRefresh.setOnClickListener { refreshTopPackage() }
@@ -353,7 +362,7 @@ class EscapeActivity : Activity() {
                     toast("目标已变化或受保护，请重新确认")
                     refreshTopPackage()
                 } else {
-                    execute(pkg, action)
+                    execute(pkg, actionName, action)
                 }
             }
             .setNegativeButton("取消", null)
@@ -361,15 +370,20 @@ class EscapeActivity : Activity() {
             .show()
     }
 
-    private fun execute(pkg: String, action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>) {
+    private fun execute(
+        pkg: String,
+        actionName: String,
+        action: (String, ShellExecutor.Mode) -> Pair<Boolean, String>
+    ) {
         if (!Prefs.canActOn(this, pkg)) {
             toast("目标已变化或受保护，请重新确认")
             return
         }
-        // 压制循环正在强停时不并行执行手动动作；等待目标阶段允许手动操作
-        if (actionJob?.isActive == true || suppressRunning) {
-            toast("已有逃生操作正在执行，请等待完成")
-            return
+        // 强制接管：终止之前的压制循环与动作任务，执行用户刚确认的操作
+        if (suppressRunning || suppressJob?.isActive == true || actionJob?.isActive == true) {
+            stopSuppress()
+            actionJob?.cancel()
+            actionJob = null
         }
         binding.tvResult.text = "执行中..."
         actionJob = scope.launch {
@@ -378,10 +392,63 @@ class EscapeActivity : Activity() {
                 if (Prefs.canActOn(this@EscapeActivity, pkg)) action(pkg, mode)
                 else false to "目标已变化或受保护，请重新确认"
             }
-            binding.tvResult.text = if (ok) "成功：$out" else "失败：$out"
-            Prefs.addEscapeLog(this@EscapeActivity, if (ok) "成功[$mode]：$pkg -> $out" else "失败[$mode]：$pkg -> $out")
-            refreshTopPackage()
+            Prefs.addEscapeLog(
+                this@EscapeActivity,
+                if (ok) "成功[$mode]：$pkg -> $out" else "失败[$mode]：$pkg -> $out"
+            )
+            when {
+                // 卸载成功：提示并提供「返回」，点击后回桌面
+                ok && actionName == "卸载" -> {
+                    binding.tvResult.text = "删除成功：$pkg"
+                    showUninstallSuccess(pkg)
+                }
+                // 卸载失败：明确提示可能删除失败
+                !ok && actionName == "卸载" -> {
+                    binding.tvResult.text = "可能删除失败：$out"
+                    showUninstallFailure(pkg, out)
+                }
+                else -> {
+                    binding.tvResult.text = if (ok) "成功：$out" else "失败：$out"
+                    refreshTopPackage()
+                    // 手动动作完成后，若常开压制仍开着则自动恢复压制
+                    if (Prefs.suppressAlwaysOn(this@EscapeActivity) && isActive) {
+                        startSuppress()
+                    }
+                }
+            }
         }
+    }
+
+    private fun showUninstallSuccess(pkg: String) {
+        AlertDialog.Builder(this)
+            .setTitle("删除成功")
+            .setMessage("$pkg 已从设备移除。\n\n点击「返回」回到桌面。")
+            .setCancelable(false)
+            .setPositiveButton("返回") { _, _ -> backToHome() }
+            .show()
+    }
+
+    private fun showUninstallFailure(pkg: String, detail: String) {
+        AlertDialog.Builder(this)
+            .setTitle("可能删除失败")
+            .setMessage("未能确认 $pkg 已删除：$detail\n\n请返回桌面查看图标是否仍在，必要时重试。")
+            .setCancelable(false)
+            .setPositiveButton("返回桌面") { _, _ -> backToHome() }
+            .setNegativeButton("留在本页") { _, _ ->
+                refreshTopPackage()
+                if (Prefs.suppressAlwaysOn(this)) startSuppress()
+            }
+            .show()
+    }
+
+    private fun backToHome() {
+        Prefs.addEscapeLog(this, "卸载流程结束，返回桌面")
+        val home = Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_HOME)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        startActivity(home)
+        finish()
     }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()

@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "lock-escape"
+rootProject.name = "tiedun"
 include(":app")

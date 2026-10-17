@@ -4,10 +4,10 @@
 
 | SHA-256 | 对应文件（含相同内容的别名） | 首次包含当前字节的提交 | 材料状态 |
 |---|---|---|---|
-| `3AB9F8BD63A6A936CE513C13F6C648CE866F061659F94F5DDB9E5F045EE86A45` | `apk/lock-escape-v2.0-official.apk`、`apk/lock-escape-v2.0-release.apk`、`apk/lock-escape-v2.0-su-direct-gpl.apk`、`apk/推荐下载-2.0正式版/锁机逃生-2.0正式版-推荐下载.apk`、`apk/推荐下载-2.0正式版/锁机逃生-2.0-SU直接启动-GPL版.apk` | [`103a8ca`](https://github.com/lilining308-prog/lock-escape/tree/103a8ca353162aa447b377c04eb2e39d226560c3) | APK 含 GPL 材料；内置 NOTICE 仍含旧的 PhoneGuard 矛盾表述。分发时应随附对应源码与更正后的独立 NOTICE。 |
-| `551E5050D4ABD7E925B896C1D53E042F0A716D63D381B28CFA5D2BC7D7700F38` | `apk/lock-escape-v2.0-debug.apk`、`apk/调试版-开发测试/锁机逃生-2.0调试版-开发测试.apk` | [`be9875e`](https://github.com/lilining308-prog/lock-escape/tree/be9875eeb6e7b01cad14e51597e5965db7638c9f) | APK 含 GPL 材料；内置 NOTICE 含旧表述，源码与构建可重复性仍待验证。 |
-| `ABCFBC300D0FFD2E2C89A0DF9370B2271E8A1298400382C4B685C64CCD4CB711` | `apk/app-debug.apk`、`apk/调试版-开发测试/app-debug-当前调试版.apk` | [`c0700af`](https://github.com/lilining308-prog/lock-escape/tree/c0700af38b75247823ea68497c9bff2f1fb7bc3b) | APK 含 GPL 材料；内置 NOTICE 含旧表述；“当前调试版”是历史文件名，不代表当前工作区源码。 |
-| `2A6FFFD2049B4EF6FD197602668C59093222F79B8BEA32E3816E9FF579EEC3B1` | `apk/lock-escape-v0.1.0-debug.apk`、`apk/历史版本-不推荐/锁机逃生-0.1.0历史调试版-不推荐.apk` | [`7ca1879`](https://github.com/lilining308-prog/lock-escape/tree/7ca1879bb276f1b45d199c9b4afce195d9d379d9) | 历史 APK 内无 `assets/GPL/`；仅保留历史溯源，不作为推荐下载。必须随包另附 GPL 文本和对应源码。 |
+| `3AB9F8BD63A6A936CE513C13F6C648CE866F061659F94F5DDB9E5F045EE86A45` | `apk/tiedun-v2.0-official.apk`、`apk/tiedun-v2.0-release.apk`、`apk/tiedun-v2.0-su-direct-gpl.apk`、`apk/推荐下载-2.0正式版/铁盾-2.0正式版-推荐下载.apk`、`apk/推荐下载-2.0正式版/铁盾-2.0-SU直接启动-GPL版.apk` | [`103a8ca`](https://github.com/lilining308-prog/tiedun/tree/103a8ca353162aa447b377c04eb2e39d226560c3) | APK 含 GPL 材料；内置 NOTICE 仍含旧的 PhoneGuard 矛盾表述。分发时应随附对应源码与更正后的独立 NOTICE。 |
+| `551E5050D4ABD7E925B896C1D53E042F0A716D63D381B28CFA5D2BC7D7700F38` | `apk/tiedun-v2.0-debug.apk`、`apk/调试版-开发测试/铁盾-2.0调试版-开发测试.apk` | [`be9875e`](https://github.com/lilining308-prog/tiedun/tree/be9875eeb6e7b01cad14e51597e5965db7638c9f) | APK 含 GPL 材料；内置 NOTICE 含旧表述，源码与构建可重复性仍待验证。 |
+| `ABCFBC300D0FFD2E2C89A0DF9370B2271E8A1298400382C4B685C64CCD4CB711` | `apk/app-debug.apk`、`apk/调试版-开发测试/app-debug-当前调试版.apk` | [`c0700af`](https://github.com/lilining308-prog/tiedun/tree/c0700af38b75247823ea68497c9bff2f1fb7bc3b) | APK 含 GPL 材料；内置 NOTICE 含旧表述；“当前调试版”是历史文件名，不代表当前工作区源码。 |
+| `2A6FFFD2049B4EF6FD197602668C59093222F79B8BEA32E3816E9FF579EEC3B1` | `apk/tiedun-v0.1.0-debug.apk`、`apk/历史版本-不推荐/铁盾-0.1.0历史调试版-不推荐.apk` | [`7ca1879`](https://github.com/lilining308-prog/tiedun/tree/7ca1879bb276f1b45d199c9b4afce195d9d379d9) | 历史 APK 内无 `assets/GPL/`；仅保留历史溯源，不作为推荐下载。必须随包另附 GPL 文本和对应源码。 |
 
 当前工作区的 `app/build/outputs/apk/debug/app-debug.apk` 是本地构建结果，不在上表已提交的 APK 中；其 SHA-256 应在实际分发时重新计算，连同对应源码一起发布。
 

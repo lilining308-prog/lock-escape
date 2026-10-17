@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="escape_red">#FF3B30</color>
-    <color name="escape_bg">#080B12</color>
+    <!-- 工业终端配色 -->
+    <color name="terminal_bg">#10151A</color>
+    <color name="terminal_panel">#1A2229</color>
+    <color name="terminal_line">#34424B</color>
+    <color name="terminal_green">#7DE2B8</color>
+    <color name="terminal_amber">#FFC46B</color>
+    <color name="terminal_red">#FF786F</color>
     <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#A8B3C7</color>
-    <color name="text_muted">#718096</color>
-    <color name="card_bg">#151B26</color>
-    <color name="card_stroke">#263247</color>
-    <color name="accent_blue">#4DA3FF</color>
-    <color name="accent_green">#39D98A</color>
-    <color name="danger_bg">#311016</color>
-    <color name="danger_stroke">#7A1E2D</color>
-    <color name="button_dark">#22304A</color>
-    <color name="button_danger">#D9364A</color>
-    <color name="chip_blue_bg">#17365F</color>
-    <color name="chip_green_bg">#123A2A</color>
-    <color name="chip_red_bg">#4A1720</color>
+    <color name="text_secondary">#AAB8C2</color>
+    <color name="text_muted">#6D7A83</color>
+
+    <!-- 兼容旧布局引用 -->
+    <color name="escape_red">#FF786F</color>
+    <color name="escape_bg">#10151A</color>
+    <color name="card_bg">#1A2229</color>
+    <color name="card_stroke">#34424B</color>
+    <color name="accent_blue">#7DE2B8</color>
+    <color name="accent_green">#7DE2B8</color>
+    <color name="danger_bg">#2A1A1A</color>
+    <color name="danger_stroke">#FF786F</color>
+    <color name="button_dark">#243038</color>
+    <color name="button_danger">#FF786F</color>
+    <color name="chip_blue_bg">#163A32</color>
+    <color name="chip_green_bg">#163A32</color>
+    <color name="chip_red_bg">#2A1A1A</color>
 </resources>

@@ -1,102 +1,33 @@
----
-AIGC:
-    Label: "1"
-    ContentProducer: 001191440300708461136T1XGW3
-    ProduceID: c9eff8d25d622adeab9f9582a71074c0_8c278ba0b40411f1a1a1525400393706
-    ReservedCode1: ohd7c4LHC/fK+dTaihNZMVOzOs+tFn4d6wX8RadTmvWqUCCH0ufh0zraOmJQOtmZZ4y5olOwC+k1bq5F0WUvYvbmLhejYHAAoD/0L3H81ITbORsxq/vhwkDmbC+OYrnSp7vMbrVSdtvoZagHU9LKyGyBrN6yt95H7X0NUGd0D8wkOUw3nOz2FUCvZSs=
-    ContentPropagator: 001191440300708461136T1XGW3
-    PropagateID: c9eff8d25d622adeab9f9582a71074c0_8c278ba0b40411f1a1a1525400393706
-    ReservedCode2: ohd7c4LHC/fK+dTaihNZMVOzOs+tFn4d6wX8RadTmvWqUCCH0ufh0zraOmJQOtmZZ4y5olOwC+k1bq5F0WUvYvbmLhejYHAAoD/0L3H81ITbORsxq/vhwkDmbC+OYrnSp7vMbrVSdtvoZagHU9LKyGyBrN6yt95H7X0NUGd0D8wkOUw3nOz2FUCvZSs=
----
+# tiedun 铁盾
 
-# lock-escape 锁机逃生
+Android 设备防护与应急处理工具：当设备被锁机程序或无障碍恶意锁屏控制时，通过物理按键组合快速呼出处理界面，强制全屏覆盖拦截，并借助 Shizuku / root 停止、停用或卸载问题组件。
 
+## 许可
 
-**半成品** Android 应急逃生工具（非成品）：当设备被锁机病毒 / 无障碍恶意锁屏控制时，通过**物理按键组合触发**，强制全屏覆盖拦截，并借助 Shizuku / root 删除或停用锁机组件。
+本项目按 GNU General Public License v3.0 发布，完整条款见随包 `LICENSE-GPL-3.0.txt`。
 
-> **本应用是一个半成品，可以基于本作品进行修改。** 项目按 GPL-3.0 发布：你可以使用、修改和再分发，需保留版权声明与上游 NOTICE，并在改动后注明来源；完整条款见随包 `LICENSE-GPL-3.0.txt` 与 `THIRD_PARTY_NOTICES.md`。
+你可以使用、修改和再分发本软件，需：
 
-## 核心思路
+- 保留版权声明与上游 `NOTICE` 声明；
+- 改动后注明来源；
+- 以 GPL-3.0 或兼容许可证分发衍生版本；
+- 提供与分发包对应的完整源码。
 
-```
-无障碍服务常驻监听音量键组合（如音量+ × 4）
-  → 触发全屏 overlay Activity（TYPE_APPLICATION_OVERLAY + 全屏标志）
-  → 无障碍窗口事件获取当前顶层包名（锁机 App）
-  → Shizuku/root 执行：am force-stop → pm disable-user（或 pm uninstall）
-  → overlay 展示删除按钮，一键清掉锁机组件
-```
+第三方项目清单与合规说明见 `THIRD_PARTY_NOTICES.md`，传递依赖许可清单见 `DEPENDENCY_LICENSES.md`。
 
-## 技术选型参考
+## 上游参考
 
-| 能力块 | 参考项目 | 许可证 | 核实状态 |
-|--------|---------|--------|---------|
-| 物理按键监听 | F111111shhh/Extinguish（fork 自 Moderpach/Extinguish） | GPL-3.0 | 已核实 |
-| 全屏覆盖 | coderlidy/Fake-Lock-Screen | MIT | 已核实 |
-| root 权限通道 | RikkaApps/Shizuku | Apache-2.0 | 已核实 |
-| 停用/冻结实现 | aistra0528/Hail | GPL-3.0 | 已核实 |
+| 上游 | 许可证 | 关系 |
+|------|--------|------|
+| F111111shhh/Extinguish（fork 自 Moderpach/Extinguish） | GPL-3.0 | 设计参考：物理按键监听 |
+| coderlidy/Fake-Lock-Screen | MIT | 设计参考：全屏覆盖 |
+| RikkaApps/Shizuku | Apache-2.0 | 依赖引入：特权命令通道 |
+| aistra0528/Hail | GPL-3.0 | 设计参考：停用/冻结 |
+| hnpdsyn/PhoneGuard | 无 LICENSE | 已排除，不得复用 |
+| me.lucky/wasted | 无法核实 | 已排除，不得复用 |
 
-## 未采用 / 合规排除来源
+## 源码
 
-| 项目 | 风险原因 | 当前处理 |
-|------|----------|----------|
-| hnpdsyn/PhoneGuard | 仓库无 LICENSE 文件，无法确认复制、修改、再分发授权 | 已确认排除：不复制、不改写、不复用源码，也不作为实现依据 |
-| me.lucky/wasted | 仓库当前 404，许可证无法核实 | 已确认排除：不复制、不改写、不复用源码，也不作为实现依据 |
+源码与文档请从本项目仓库获取。分发本 APK 时，须一并提供对应版本的完整源码、`LICENSE-GPL-3.0.txt`、`NOTICE` 与 `THIRD_PARTY_NOTICES.md`。
 
-## 开源许可与合规
-
-- 本项目主许可证为 **GPL-3.0**（见 [LICENSE](LICENSE)）。
-- 上游参考项目的版权归属与完整许可文本见 [NOTICE](NOTICE)，项目清单与合规说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
-- `hnpdsyn/PhoneGuard` 与 `me.lucky/wasted` 已列为“未采用 / 合规排除来源”：不得复制、改写或直接复用其源码；当前实现仅使用 Android SDK 公开 API、Shizuku 依赖和本项目原创 GPL-3.0 代码。
-- 仓库公开已提交源码：[主源码 app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)，[测试源码 app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)。分发 APK 时须提供与该 APK 对应的源码版本、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md`；仅提供 `main` 链接不足以证明源码对应关系。
-- 所有原创源码按 GPL-3.0 分发，源码文件保留 GPL 头部声明；资源、构建脚本、文档和 APK 分发说明均按 GPL-3.0 随项目发布。
-- 包含本文件的构建在 `assets/GPL/` 中打包许可与源码获取说明；历史 `0.1.0` 包没有该目录，不能把这句话视为所有历史 APK 的核查结论。
-
-## APK 下载
-
-`apk/` 内的安装包是历史构建，完整对应源码与第三方依赖许可尚未逐包核实，当前暂停推荐；历史目录名中包含“推荐”不代表当前核查结论。
-
-更多 APK 分类、历史版本和调试版说明见 [apk/README.md](apk/README.md)。
-
-## 当前开发版源码
-
-- 当前开发版主源码目录：[app/src/main/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java)
-- 当前开发版测试源码目录：[app/src/test/java](https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java)
-- 本地源码路径：`app/src/main/java/com/lilining/lockescape/`
-- 本地测试源码路径：`app/src/test/java/com/lilining/lockescape/`
-- 源码目录说明文件：`app/src/main/java/README.md`
-- APK 内置源码公开说明：`app/src/main/assets/GPL/SOURCE_PATHS.md`，打包后位于 APK 的 `assets/GPL/SOURCE_PATHS.md`。
-
-## 状态
-
-- [x] 项目骨架（Kotlin + Gradle）
-- [x] 无障碍服务 + 按键监听
-- [x] 全屏 overlay 拦截界面
-- [x] Shizuku/root 删除通道
-- [x] 前台保活
-- [x] 长按音量下键 1.5s 强制弹出（备用：连按 4 次）
-- [x] 系统关键应用黑名单 + 二次确认 + 红字警告
-- [x] 持续压制模式（2s 循环强停，防病毒重启）
-- [x] 逃生日志（最近 20 条，主界面可查）
-- [x] 锁屏自动解锁辅助（requestDismissKeyguard）
-- [x] 修复音量下长按触发与系统应用误拦截，支持 root 优先模式（版本号 2.0 不代表成品发布）
-- [x] 用户自定义白名单 + 系统桌面默认屏蔽，避免桌面触发风控
-- [x] 白名单与逃生记录的基础管理（半成品，未做完整打磨）
-- [ ] 成品化项：正式签名与发布、机型适配、界面文案打磨、历史包合规收口
-
-**本应用是半成品，不是成品；欢迎基于本作品修改。**
-
-## 触发方式
-
-| 触发 | 操作 |
-|------|------|
-| 长按音量下键 | 按住 1.5 秒弹出逃生界面 |
-| 连按音量键 | 1.5 秒内连按 4 次弹出逃生界面 |
-
-## 逃生动作
-
-| 动作 | 命令 | 系统应用保护 |
-|------|------|--------------|
-| 强制停止 | am force-stop | 可执行但警告 |
-| 停用 | pm disable-user --user 0 | 黑名单禁止 |
-| 卸载 | pm uninstall --user 0 | 黑名单禁止 |
-| 持续压制 | 2s 循环 force-stop | 黑名单禁止 |
+完整条款与免责声明以 `LICENSE-GPL-3.0.txt` 为准。

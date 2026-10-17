@@ -1,11 +1,12 @@
 【视频简介 / 社区帖补充】
 
-开源半成品 · Android 锁机逃生工具 lock-escape
+tiedun 铁盾 · Android 设备防护与应急处理工具
 
-功能：物理按键触发全屏拦截，经 Shizuku/root 删除或停用锁机组件。
+功能：物理按键触发全屏拦截，经 Shizuku/root 停止、停用或卸载问题组件。
+附带黑名单护盾、白名单保护、持续压制与 Root 守护。
 许可：GPL-3.0。欢迎基于此修改扩展。
 
-仓库：https://github.com/lilining308-prog/lock-escape
-Release 分类下载：https://github.com/lilining308-prog/lock-escape/releases/tag/v2.0
+仓库：https://github.com/lilining308-prog/tiedun
+Release 分类下载：https://github.com/lilining308-prog/tiedun/releases/tag/v2.0
 
 #Android #OpenSource #FOSS #Shizuku

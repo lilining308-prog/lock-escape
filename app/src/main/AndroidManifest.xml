@@ -33,18 +33,13 @@
             </intent-filter>
         </activity>
 
-        <!-- 独立 Root 逃生入口：启动后自动切换 root 优先模式 -->
+        <!-- Root 直启入口：仅由主界面显式调用，不在桌面生成快捷方式 -->
         <activity
             android:name=".RootLauncherActivity"
-            android:exported="true"
+            android:exported="false"
             android:excludeFromRecents="true"
             android:label="@string/root_launcher_label"
-            android:theme="@style/Theme.LockEscape">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.LockEscape" />
 
         <!-- 全屏逃生拦截界面 -->
         <activity

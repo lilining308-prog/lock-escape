@@ -4,7 +4,29 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- 几何盾牌主体：切角多边形，工业感 -->
     <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M54,26 L70,42 L62,42 L62,72 L46,72 L46,42 L38,42 Z" />
+        android:fillColor="#FF7DE2B8"
+        android:pathData="M54,22 L80,32 L80,56 L74,72 L54,86 L34,72 L28,56 L28,32 Z" />
+
+    <!-- 内腔挖空：形成描边盾形 -->
+    <path
+        android:fillColor="#FF10151A"
+        android:pathData="M54,30 L73,37 L73,55 L68,66 L54,76 L40,66 L35,55 L35,37 Z" />
+
+    <!-- 中央竖脊 -->
+    <path
+        android:fillColor="#FF7DE2B8"
+        android:pathData="M51,40 L57,40 L57,64 L51,64 Z" />
+
+    <!-- 横向扫描缺口：竖脊中部断开 -->
+    <path
+        android:fillColor="#FF10151A"
+        android:pathData="M48,49 L60,49 L60,55 L48,55 Z" />
+
+    <!-- 断口内的琥珀提示条 -->
+    <path
+        android:fillColor="#FFFFC46B"
+        android:pathData="M51,50 L57,50 L57,54 L51,54 Z" />
 </vector>

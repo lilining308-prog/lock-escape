@@ -1,11 +1,11 @@
 【动态】
 
-开源了一个 Android 应急逃生小工具（半成品）：被锁机病毒/无障碍恶意锁屏控制时，物理按键触发全屏拦截，再经 Shizuku/root 删除锁机组件。
+开源了一个 Android 设备防护与应急处理工具 tiedun 铁盾：被锁机程序或无障碍恶意锁屏控制时，物理按键触发全屏拦截，再经 Shizuku/root 停止或卸载问题组件。
 
-GPL-3.0，欢迎基于此修改扩展。安装包按 stable / debug / archive 分类好了。
+带黑名单护盾、白名单保护、持续压制和 Root 守护。GPL-3.0，欢迎基于此修改扩展。安装包按 stable / debug / archive 分类。
 
-仓库：https://github.com/lilining308-prog/lock-escape
-下载：https://github.com/lilining308-prog/lock-escape/releases/tag/v2.0
+仓库：https://github.com/lilining308-prog/tiedun
+下载：https://github.com/lilining308-prog/tiedun/releases/tag/v2.0
 
 #开源 #Android #Shizuku
 

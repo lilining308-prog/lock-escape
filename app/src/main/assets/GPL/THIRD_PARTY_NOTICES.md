@@ -53,4 +53,4 @@ Shizuku 仓库无独立 NOTICE 文件；完整 Apache-2.0 许可文本见 [NOTIC
 5. 当前实现基于 Android SDK 公开 API、Shizuku 依赖和本项目原创 GPL-3.0 代码；若后续发现任何来自未授权来源的复制实现，必须删除并以原创实现替换。
 
 ---
-本文件由 lock-escape 项目维护，随项目分发。
+本文件由 tiedun 项目维护，随项目分发。

@@ -1,6 +1,6 @@
 # GPL 源码公开说明
 
-本 APK 属于 lock-escape 项目，主许可证为 GPL-3.0。
+本 APK 属于 tiedun 项目，主许可证为 GPL-3.0。
 
 ## 源码直达路径
 
@@ -15,8 +15,8 @@
 
 以下 `main` 链接仅指向线上已提交版本；若分发的 APK 由其他提交或未提交工作区构建，须另行提供与该 APK 对应的完整源码及构建脚本，不应仅以此链接代替。
 
-- 主源码：https://github.com/lilining308-prog/lock-escape/tree/main/app/src/main/java
-- 测试源码：https://github.com/lilining308-prog/lock-escape/tree/main/app/src/test/java
+- 主源码：https://github.com/lilining308-prog/tiedun/tree/main/app/src/main/java
+- 测试源码：https://github.com/lilining308-prog/tiedun/tree/main/app/src/test/java
 
 ## APK 内置许可文件
 

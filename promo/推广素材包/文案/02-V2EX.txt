@@ -1,18 +1,19 @@
-【社区帖】lock-escape 锁机逃生 · 开源 Android 应急逃生工具
+【社区帖】tiedun 铁盾 · Android 设备防护与应急处理工具
 
-被锁机病毒 / 无障碍恶意锁屏困住时：
-连按音量键（或长按音量下）→ 全屏 Overlay 拦截 → Shizuku/root 把锁机组件 force-stop / disable / uninstall。
+被锁机程序 / 无障碍恶意锁屏困住时：
+连按音量键（或长按音量下）→ 全屏拦截界面 → Shizuku/root 把问题组件 force-stop / disable / uninstall。
 
 要点：
 · 无障碍按键监听 + 全屏拦截
-· Shizuku / root 清除通道（系统包/桌面/输入法保护）
-· 白名单、逃生日志、持续压制
+· Shizuku / root 处理通道（系统包/桌面/输入法保护）
+· 黑名单护盾、白名单、持续压制、处理日志
+· Root 守护监听 + 无障碍锁定（总开关可关）
 · GPL-3.0，附 NOTICE / 第三方声明 / 依赖许可清单
-· 定位是半成品，欢迎 Fork / PR
+· 欢迎 Fork / PR
 
-安装包已分类（stable 推荐 / debug / archive），Release 可直接下：
-https://github.com/lilining308-prog/lock-escape/releases/tag/v2.0
+安装包已分类（stable / debug / archive），Release 可直接下：
+https://github.com/lilining308-prog/tiedun/releases/tag/v2.0
 
-仓库：https://github.com/lilining308-prog/lock-escape
+仓库：https://github.com/lilining308-prog/tiedun
 
 配图建议：封面 cover-wide + 主界面截图 1-2 张
