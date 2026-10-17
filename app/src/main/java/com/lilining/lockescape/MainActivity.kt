@@ -18,6 +18,7 @@
 package com.lilining.lockescape
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -101,6 +102,28 @@ class MainActivity : AppCompatActivity() {
             refreshStatus()
         }
 
+        binding.btnAdbLock.setOnClickListener {
+            val locked = AdbAccessibilityLock.isLocked()
+            if (locked) {
+                val r = AdbAccessibilityLock.unlock()
+                Prefs.addEscapeLog(this, "ADB 无障碍解锁：${r.message}")
+                toast(r.message)
+            } else {
+                val r = AdbAccessibilityLock.lock()
+                Prefs.addEscapeLog(this, "ADB 无障碍锁定：${r.message}")
+                toast(r.message)
+            }
+            refreshStatus()
+        }
+
+        binding.btnAdbCommand.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("ADB 手动锁定命令")
+                .setMessage(AdbAccessibilityLock.manualLockCommand)
+                .setPositiveButton("知道了", null)
+                .show()
+        }
+
         requestNotificationPermissionIfNeeded()
 
         // 若用户此前开启过锁定，进程重建后自动拉起守护
@@ -145,6 +168,13 @@ class MainActivity : AppCompatActivity() {
             if (keeperLog.isNotBlank()) append("\n").append(keeperLog)
         }
         binding.btnRootDaemon.text = if (rootRunning) "停止 Root 守护监听" else "启动 Root 守护监听"
+
+        val adbLocked = AdbAccessibilityLock.isLocked()
+        binding.btnAdbLock.text = if (adbLocked) "解除 ADB 无障碍锁定" else "ADB 无障碍锁定"
+        binding.tvAdbLockStatus.text = buildString {
+            append("ADB/Shizuku 锁定：").append(if (adbLocked) "已锁定" else "未锁定")
+            append(" · Shizuku：").append(if (AdbAccessibilityLock.isShizukuReady()) "就绪" else "未就绪")
+        }
     }
 
     private fun channelStatusText(): String {

@@ -193,6 +193,34 @@
                 android:text="Root 守护：未运行"
                 android:textColor="@color/accent_green"
                 android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btnAdbLock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="ADB 无障碍锁定"
+                android:textColor="@color/text_primary" />
+
+            <Button
+                android:id="@+id/btnAdbCommand"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="查看 ADB 手动命令"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/tvAdbLockStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="monospace"
+                android:text="ADB/Shizuku 锁定：未锁定"
+                android:textColor="@color/accent_green"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <LinearLayout
