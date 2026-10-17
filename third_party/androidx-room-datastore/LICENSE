@@ -1,0 +1,5 @@
+Apache License 2.0
+
+The AndroidX Room and DataStore artifacts planned for the data-layer upgrade are licensed under the Apache License, Version 2.0. The authoritative license text and attribution for the resolved dependency set are retained in the repository root NOTICE and docs/DEPENDENCY_LICENSES.md.
+
+This directory is a compliance placeholder for the dependency family; these artifacts are not included in the current offline-compiled build.

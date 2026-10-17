@@ -32,6 +32,9 @@ object Prefs {
     private const val KEY_LOGS = "escape_logs"
     private const val KEY_EXECUTION_MODE = "execution_mode"
     private const val KEY_USER_WHITELIST = "user_whitelist"
+    private const val KEY_ROOT_KEEPER = "root_accessibility_keeper"
+    private const val KEY_ROOT_DAEMON = "root_monitor_enabled"
+    private const val KEY_SUPPRESS_ALWAYS_ON = "suppress_always_on"
     private const val MAX_LOGS = 20
 
     fun currentTopPackage(ctx: Context): String =
@@ -141,6 +144,39 @@ object Prefs {
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_USER_WHITELIST, normalized.sorted().joinToString("\n"))
+            .apply()
+    }
+
+    /** Root 无障碍锁定总开关：仅当为 true 时守护进程才会改写无障碍设置。 */
+    fun rootKeeperEnabled(ctx: Context): Boolean =
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE).getBoolean(KEY_ROOT_KEEPER, false)
+
+    fun saveRootKeeperEnabled(ctx: Context, enabled: Boolean) {
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_ROOT_KEEPER, enabled)
+            .apply()
+    }
+
+    /** Root 守护监听开关（前台包名采集）。 */
+    fun rootDaemonEnabled(ctx: Context): Boolean =
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE).getBoolean(KEY_ROOT_DAEMON, false)
+
+    fun saveRootDaemonEnabled(ctx: Context, enabled: Boolean) {
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_ROOT_DAEMON, enabled)
+            .apply()
+    }
+
+    /** 持续压制常开：默认开启，逃生控制台打开即压制。 */
+    fun suppressAlwaysOn(ctx: Context): Boolean =
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE).getBoolean(KEY_SUPPRESS_ALWAYS_ON, true)
+
+    fun saveSuppressAlwaysOn(ctx: Context, enabled: Boolean) {
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_SUPPRESS_ALWAYS_ON, enabled)
             .apply()
     }
 }

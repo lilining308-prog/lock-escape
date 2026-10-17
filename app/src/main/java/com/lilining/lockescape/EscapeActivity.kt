@@ -38,6 +38,9 @@ import kotlinx.coroutines.withContext
  * 全屏逃生拦截界面：
  * 展示被锁定的顶层包名，提供 强停 / 停用 / 卸载 三个逃生动作，以及持续压制模式。
  *
+ * 持续压制：常开（可关），逃生控制台一打开就自动进入压制；
+ * 尚未捕获到有效目标时会等待，不会因为“暂时没目标”而关掉开关。
+ *
  * 安全保护：
  * 1. 系统关键应用（桌面/系统UI/设置/电话等）禁止停用与卸载，强停也会警告；
  * 2. 所有破坏性动作执行前必须二次确认。
@@ -49,6 +52,9 @@ class EscapeActivity : Activity() {
     private val scope = MainScope()
     private var suppressJob: Job? = null
     private var actionJob: Job? = null
+    /** 只有真正进入 force-stop 循环才算压制中；等待目标不算。 */
+    @Volatile
+    private var suppressRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,19 +91,32 @@ class EscapeActivity : Activity() {
             toast(if (checked) "已切换为 root 优先模式" else "已切换为自动模式")
         }
 
-        // 持续压制模式：每隔 SUPPRESS_INTERVAL_MS 强制停止当前顶层包名，防止病毒重启
+        // 持续压制：常开，打开控制台即压制；开关状态持久化
+        binding.switchSuppress.isChecked = Prefs.suppressAlwaysOn(this)
         binding.switchSuppress.setOnCheckedChangeListener { _, checked ->
+            Prefs.saveSuppressAlwaysOn(this, checked)
             if (checked) {
                 startSuppress()
             } else {
                 stopSuppress()
+                binding.tvResult.text = "持续压制已关闭"
+                Prefs.addEscapeLog(this, "关闭持续压制")
             }
+        }
+
+        // 控制台打开即压制
+        if (Prefs.suppressAlwaysOn(this)) {
+            startSuppress()
         }
     }
 
     override fun onResume() {
         super.onResume()
         refreshTopPackage()
+        // 从后台回来时若开着常开压制但循环已停，重新拉起
+        if (Prefs.suppressAlwaysOn(this) && suppressJob?.isActive != true) {
+            startSuppress()
+        }
     }
 
     private fun dismissKeyguard() {
@@ -107,57 +126,77 @@ class EscapeActivity : Activity() {
         }
     }
 
+    /**
+     * 启动持续压制。
+     * 无目标时进入等待（开关保持打开），有目标后每 SUPPRESS_INTERVAL_MS 强停一次。
+     */
     private fun startSuppress() {
         stopSuppress()
-        val pkg = Prefs.currentTopPackage(this)
-        if (pkg.isBlank() || !AppSafety.isValidPackageName(pkg)) {
-            toast("尚未捕获到顶层应用包名，无法压制")
-            binding.switchSuppress.isChecked = false
-            return
-        }
-        if (isSystemApp(pkg) || pkg == packageName || AppSafety.isDefaultWhitelistedPackage(pkg)) {
-            toast("顶层是系统应用，禁止持续压制")
-            binding.switchSuppress.isChecked = false
-            return
-        }
-        if (isWhitelisted(pkg)) {
-            toast("顶层应用已在白名单，禁止持续压制")
-            binding.switchSuppress.isChecked = false
-            return
-        }
-        if (!Prefs.canActOn(this, pkg)) {
-            toast("目标已失效或属于默认桌面、输入法，禁止持续压制")
-            binding.switchSuppress.isChecked = false
-            return
-        }
-        binding.tvResult.text = "持续压制中：$pkg"
+        binding.switchSuppress.isChecked = true
+        binding.tvResult.text = "持续压制：等待目标…"
         suppressJob = scope.launch {
-            while (isActive) {
-                if (!Prefs.canActOn(this@EscapeActivity, pkg)) {
-                    binding.tvResult.text = "压制已停止：目标失效、受保护或已加入白名单"
-                    break
+            // 阶段一：等待有效目标（不因暂无目标而关掉开关）
+            val pkg = awaitActionableTarget()
+            if (pkg == null) {
+                if (isActive) {
+                    binding.tvResult.text = "持续压制：等待目标中…（切换到目标应用后自动压制）"
                 }
-                val mode = Prefs.executionMode(this@EscapeActivity)
-                val (ok, out) = withContext(Dispatchers.IO) {
-                    if (Prefs.canActOn(this@EscapeActivity, pkg))
-                        ShellExecutor.forceStop(this@EscapeActivity, pkg, mode)
-                    else false to "目标已变化或受保护"
-                }
-                if (!ok) {
-                    binding.tvResult.text = "压制失败：$out"
-                    break
-                }
-                delay(SUPPRESS_INTERVAL_MS)
+                return@launch
             }
-            binding.switchSuppress.isChecked = false
+            // 阶段二：进入强停循环
+            suppressRunning = true
+            binding.tvResult.text = "持续压制中：$pkg"
+            Prefs.addEscapeLog(this@EscapeActivity, "开启持续压制 $pkg")
+            try {
+                while (isActive) {
+                    if (!Prefs.canActOn(this@EscapeActivity, pkg) || isBlockedForSuppress(pkg)) {
+                        binding.tvResult.text = "压制已停止：目标失效、受保护或已加入白名单"
+                        Prefs.addEscapeLog(this@EscapeActivity, "停止持续压制 $pkg")
+                        break
+                    }
+                    val mode = Prefs.executionMode(this@EscapeActivity)
+                    val (ok, out) = withContext(Dispatchers.IO) {
+                        if (Prefs.canActOn(this@EscapeActivity, pkg))
+                            ShellExecutor.forceStop(this@EscapeActivity, pkg, mode)
+                        else false to "目标已变化或受保护"
+                    }
+                    if (!ok) {
+                        binding.tvResult.text = "压制失败：$out"
+                        Prefs.addEscapeLog(this@EscapeActivity, "压制失败 $pkg -> $out")
+                        break
+                    }
+                    delay(SUPPRESS_INTERVAL_MS)
+                }
+            } finally {
+                suppressRunning = false
+            }
         }
-        Prefs.addEscapeLog(this, "开启持续压制 $pkg")
     }
 
     private fun stopSuppress() {
         suppressJob?.cancel()
         suppressJob = null
+        suppressRunning = false
     }
+
+    /** 轮询等待一个可压制的目标；循环被取消或活动销毁时返回 null。 */
+    private suspend fun awaitActionableTarget(): String? {
+        while (scope.isActive) {
+            val pkg = Prefs.currentTopPackage(this)
+            if (pkg.isNotBlank() && AppSafety.isValidPackageName(pkg) &&
+                !isBlockedForSuppress(pkg) && Prefs.canActOn(this, pkg)
+            ) {
+                return pkg
+            }
+            delay(TARGET_POLL_INTERVAL_MS)
+        }
+        return null
+    }
+
+    /** 压制黑名单：系统关键包、本应用、默认桌面、输入法、白名单。 */
+    private fun isBlockedForSuppress(pkg: String): Boolean =
+        isSystemApp(pkg) || pkg == packageName ||
+            AppSafety.isDefaultWhitelistedPackage(pkg) || isWhitelisted(pkg)
 
     private fun refreshTopPackage() {
         val pkg = Prefs.currentTopPackage(this)
@@ -285,7 +324,7 @@ class EscapeActivity : Activity() {
         if (isWhitelisted(pkg)) {
             AlertDialog.Builder(this)
                 .setTitle("已拦截：白名单应用")
-                .setMessage("$pkg 已在白名单中，不会执行 $actionName。")
+                .setMessage("$pkg 已在白名单中，不会执行$actionName。")
                 .setPositiveButton("知道了", null)
                 .setOnDismissListener { refreshTopPackage() }
                 .show()
@@ -294,7 +333,7 @@ class EscapeActivity : Activity() {
         if (system) {
             AlertDialog.Builder(this)
                 .setTitle("已拦截：系统关键应用")
-                .setMessage("$pkg 是系统关键组件或逃生工具，禁止执行 $actionName，以免设备不可用或失去逃生入口。")
+                .setMessage("$pkg 是系统关键组件或逃生工具，禁止执行$actionName，以免设备不可用或失去逃生入口。")
                 .setPositiveButton("知道了", null)
                 .setNegativeButton("取消", null)
                 .setOnDismissListener { refreshTopPackage() }
@@ -327,7 +366,8 @@ class EscapeActivity : Activity() {
             toast("目标已变化或受保护，请重新确认")
             return
         }
-        if (actionJob?.isActive == true || suppressJob?.isActive == true) {
+        // 压制循环正在强停时不并行执行手动动作；等待目标阶段允许手动操作
+        if (actionJob?.isActive == true || suppressRunning) {
             toast("已有逃生操作正在执行，请等待完成")
             return
         }
@@ -355,6 +395,7 @@ class EscapeActivity : Activity() {
     companion object {
         /** 持续压制间隔 */
         private const val SUPPRESS_INTERVAL_MS = 2000L
-
+        /** 等待目标时的轮询间隔 */
+        private const val TARGET_POLL_INTERVAL_MS = 1000L
     }
 }

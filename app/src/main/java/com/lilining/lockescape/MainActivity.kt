@@ -32,7 +32,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.lilining.lockescape.databinding.ActivityMainBinding
 import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuProvider
 
 class MainActivity : AppCompatActivity() {
 
@@ -63,15 +62,52 @@ class MainActivity : AppCompatActivity() {
         binding.btnRootEscape.setOnClickListener {
             startActivity(Intent(this, RootLauncherActivity::class.java))
         }
-        requestNotificationPermissionIfNeeded()
-    }
 
-    private fun requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
-        ) return
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+        binding.switchRootKeeper.isChecked = Prefs.rootKeeperEnabled(this)
+        binding.switchRootKeeper.setOnCheckedChangeListener { _, checked ->
+            Prefs.saveRootKeeperEnabled(this, checked)
+            RootMonitorDaemon.setKeeperEnabled(this, checked)
+            if (checked) {
+                val started = RootMonitorDaemon.start(this)
+                Prefs.saveRootDaemonEnabled(this, started)
+                if (started) {
+                    Prefs.addEscapeLog(this, "开启 Root 无障碍锁定")
+                    toast("Root 无障碍锁定已开启")
+                } else {
+                    toast("无法启动 root 守护，请检查 su 授权")
+                    binding.switchRootKeeper.isChecked = false
+                    Prefs.saveRootKeeperEnabled(this, false)
+                    RootMonitorDaemon.setKeeperEnabled(this, false)
+                }
+            } else {
+                RootMonitorDaemon.setKeeperEnabled(this, false)
+                Prefs.addEscapeLog(this, "关闭 Root 无障碍锁定")
+                toast("已关闭无障碍锁定，可正常在系统设置中关闭服务")
+            }
+            refreshStatus()
+        }
+
+        binding.btnRootDaemon.setOnClickListener {
+            if (RootMonitorDaemon.isRunning()) {
+                RootMonitorDaemon.stop(this)
+                Prefs.saveRootDaemonEnabled(this, false)
+                Prefs.addEscapeLog(this, "停止 Root 守护监听")
+                toast("Root 守护已停止")
+            } else {
+                val started = RootMonitorDaemon.start(this)
+                Prefs.saveRootDaemonEnabled(this, started)
+                toast(if (started) "Root 守护已启动" else "Root 守护启动失败")
+            }
+            refreshStatus()
+        }
+
+        requestNotificationPermissionIfNeeded()
+
+        // 若用户此前开启过锁定，进程重建后自动拉起守护
+        if (Prefs.rootKeeperEnabled(this) || Prefs.rootDaemonEnabled(this)) {
+            RootMonitorDaemon.setKeeperEnabled(this, Prefs.rootKeeperEnabled(this))
+            RootMonitorDaemon.start(this)
+        }
     }
 
     override fun onResume() {
@@ -98,15 +134,28 @@ class MainActivity : AppCompatActivity() {
         val logs = Prefs.getEscapeLogs(this)
         binding.tvLogs.text = if (logs.isEmpty()) "暂无逃生记录" else logs.joinToString("\n")
         binding.tvChannelStatus.text = channelStatusText()
+
+        val rootRunning = RootMonitorDaemon.isRunning()
+        binding.tvRootDaemonStatus.text = buildString {
+            append("Root 守护：").append(if (rootRunning) "运行中" else "未运行")
+            append(" · 无障碍锁定：").append(if (Prefs.rootKeeperEnabled(this@MainActivity)) "开启" else "关闭")
+            val fg = RootMonitorDaemon.lastForegroundPackage(this@MainActivity)
+            if (fg.isNotBlank()) append("\nRoot 观测前台：").append(fg)
+            val keeperLog = RootMonitorDaemon.keeperLog(this@MainActivity)
+            if (keeperLog.isNotBlank()) append("\n").append(keeperLog)
+        }
+        binding.btnRootDaemon.text = if (rootRunning) "停止 Root 守护监听" else "启动 Root 守护监听"
     }
 
     private fun channelStatusText(): String {
         val mode = Prefs.executionMode(this)
         val shizukuReady = Shizuku.pingBinder() && (Shizuku.isPreV11() ||
             Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED)
+        val root = RootChannel.probe()
         return buildString {
             append("执行模式：")
             append(if (mode == ShellExecutor.Mode.ROOT) "root 优先" else "自动（Shizuku 优先）")
+            append(" · Root：").append(root.message)
             append(if (shizukuReady) " · Shizuku 就绪" else " · 需要 Shizuku 或 root")
         }
     }
@@ -138,6 +187,14 @@ class MainActivity : AppCompatActivity() {
                 Uri.parse("package:$packageName")
             )
         )
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) return
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
     }
 
     private fun isAccessibilityEnabled(): Boolean {

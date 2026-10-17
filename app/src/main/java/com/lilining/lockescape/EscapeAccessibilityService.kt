@@ -23,6 +23,11 @@ import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 /**
  * 无障碍服务：
@@ -32,10 +37,13 @@ import android.view.accessibility.AccessibilityEvent
 class EscapeAccessibilityService : AccessibilityService() {
     private val handler = Handler(Looper.getMainLooper())
     private val volumeKeyTrigger = VolumeKeyTrigger()
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private lateinit var shieldRepository: ShieldRepository
     private var longPressTask: Runnable? = null
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        shieldRepository = ShieldRepository(this)
         // 启动前台保活服务
         startForegroundService(Intent(this, DaemonService::class.java))
     }
@@ -113,14 +121,34 @@ class EscapeAccessibilityService : AccessibilityService() {
                     return
                 }
                 Prefs.saveCurrentTopPackage(this, pkg)
+                if (::shieldRepository.isInitialized) {
+                    serviceScope.launch {
+                        if (shieldRepository.isBlacklisted(pkg)) {
+                            val label = runCatching {
+                                packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
+                            }.getOrDefault(pkg)
+                            shieldRepository.addEvent(pkg, label, "accessibility", "warning", "blacklist-hit")
+                            launchShieldWarning(pkg)
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private fun launchShieldWarning(pkg: String) {
+        val intent = Intent(this, EscapeActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra("shield_target_package", pkg)
+        }
+        startActivity(intent)
     }
 
     override fun onInterrupt() = Unit
 
     override fun onDestroy() {
         cancelLongPress()
+        serviceScope.cancel()
         super.onDestroy()
     }
 }
